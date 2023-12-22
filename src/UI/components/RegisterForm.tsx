@@ -1,21 +1,23 @@
-import { FieldValues, useForm } from "react-hook-form";
-import Joi from "joi";
-import { joiResolver } from "@hookform/resolvers/joi";
-import { useState } from "react";
-import styled from "@emotion/styled";
-import { Link } from "react-router-dom";
 import {
   Button,
   Flex,
   FormControl,
   FormErrorMessage,
+  FormHelperText,
   FormLabel,
   Input,
   ListItem,
   Text,
   UnorderedList,
+  useToast,
 } from "@chakra-ui/react";
+import styled from "@emotion/styled";
+import { joiResolver } from "@hookform/resolvers/joi";
+import Joi from "joi";
+import { useState } from "react";
+import { FieldValues, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { Link, useNavigate } from "react-router-dom";
 import useRegister from "../../hooks/useUsers";
 import { User } from "../../services/userService";
 
@@ -24,6 +26,7 @@ interface FormData {
   email: string;
   password: string;
   country: string;
+  name: string;
 }
 
 const Form = styled("form")({
@@ -46,18 +49,19 @@ const Div = styled("div")({
   marginTop: "30px",
 });
 
-const AuthForm = () => {
+const RegisterForm = () => {
   const { t } = useTranslation();
   const schema = Joi.object({
     username: Joi.string()
       .min(3)
       .max(15)
-      .alphanum()
+      // eslint-disable-next-line
+      .regex(/[a-zA-Z0-9\.]/)
       .required()
       .messages({
         "string.min": t("auth.usernameErrors.1"),
         "string.max": t("auth.usernameErrors.2"),
-        "string.alphanum": t("auth.usernameErrors.3"),
+        "string.pattern.base": t("auth.usernameErrors.3"),
       }),
     email: Joi.string()
       .regex(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)
@@ -69,6 +73,15 @@ const AuthForm = () => {
       .required()
       .messages({ "string.min": "", "string.pattern.base": "" }),
     country: Joi.string().required(),
+    name: Joi.string()
+      .min(3)
+      .max(30)
+      .regex(/[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ]/)
+      .messages({
+        "string.min": t("auth.nameErrors.1"),
+        "string.max": t("auth.nameErrors.2"),
+        "string.pattern.base": t("auth.nameErrors.3"),
+      }),
   }).messages({
     "string.empty": t("errors.required"),
   });
@@ -78,18 +91,25 @@ const AuthForm = () => {
     handleSubmit,
     formState: { errors, isSubmitted },
   } = useForm<FormData>({ resolver: joiResolver(schema) });
-  const { data, error, mutate } = useRegister();
+  const navigate = useNavigate();
+  const toast = useToast();
+  const { mutate, error } = useRegister(() => {
+    navigate("/");
+    toast({
+      title: t("auth.accountCreated"),
+      description: t("auth.yourAccountWasCreated"),
+      duration: 5000,
+      isClosable: true,
+      status: 'success'
+    })
+  });
   const [passwordVal, setPasswordVal] = useState("");
   const patternMin = new RegExp(/.{8,}/);
   const patternUpperCase = new RegExp(/[A-Z]/);
   const patternNum = new RegExp(/[0-9]/);
-  const onSubmit = (data: FieldValues) => {
-    mutate(data as User);
+  const onSubmit = (formData: FieldValues) => {
+    mutate(formData as User);
   };
-  console.log(data);
-  console.log(errors.password?.message);
-  
-  if (error) throw error;
 
   return (
     <Div>
@@ -97,14 +117,63 @@ const AuthForm = () => {
         {t("auth.signUp")}
       </Text>
       <Form onSubmit={handleSubmit(onSubmit)}>
-        <FormControl isInvalid={errors.username ? true : false}>
-          <FormLabel>{t("auth.username")}</FormLabel>
-          <Input {...register("username")} name="username" type="text" />
-          {errors.username ? (
-            <FormErrorMessage>{errors.username.message}</FormErrorMessage>
+        <FormControl isInvalid={errors.name ? true : false}>
+          <FormLabel>{t("auth.name")}</FormLabel>
+          <Input
+            autoComplete="name"
+            {...register("name")}
+            name="name"
+            type="text"
+          />
+          {errors.name ? (
+            <FormErrorMessage>{errors.name.message}</FormErrorMessage>
           ) : null}
         </FormControl>
-        <FormControl mt={2} isInvalid={errors.email ? true : false}>
+        <FormControl
+          mt={2}
+          isInvalid={
+            errors.username
+              ? true
+              : error
+              ? error.response?.data.type === "username"
+                ? true
+                : false
+              : false
+          }
+        >
+          <FormLabel>{t("auth.username")}</FormLabel>
+          <Input
+            autoComplete="nickname"
+            {...register("username")}
+            name="username"
+            type="text"
+          />
+          {errors.username ? (
+            <FormErrorMessage>{errors.username.message}</FormErrorMessage>
+          ) : error ? (
+            error.response?.data.type === "username" ? (
+              <FormErrorMessage>
+                {t(`auth.${error.response.data.errorCode}`)}
+              </FormErrorMessage>
+            ) : (
+              <FormHelperText>{t("auth.justDisplayUsername")}</FormHelperText>
+            )
+          ) : (
+            <FormHelperText>{t("auth.justDisplayUsername")}</FormHelperText>
+          )}
+        </FormControl>
+        <FormControl
+          mt={2}
+          isInvalid={
+            errors.email
+              ? true
+              : error
+              ? error.response?.data.type === "email"
+                ? true
+                : false
+              : false
+          }
+        >
           <FormLabel>{t("auth.email")}</FormLabel>
           <Input
             autoComplete="email"
@@ -113,9 +182,18 @@ const AuthForm = () => {
             type="text"
           />
           {errors.email ? (
-            <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
-          ) : // <FormHelperText>We'll never share your email.</FormHelperText>
-          null}
+            <FormErrorMessage>{errors.email.message}</FormErrorMessage>
+          ) : error ? (
+            error.response?.data.type === "email" ? (
+              <FormErrorMessage>
+                {t(`auth.${error.response.data.errorCode}`)}
+              </FormErrorMessage>
+            ) : (
+              <FormHelperText>{t("auth.signInWithEmail")}</FormHelperText>
+            )
+          ) : (
+            <FormHelperText>{t("auth.signInWithEmail")}</FormHelperText>
+          )}
         </FormControl>
         <FormControl
           mt={2}
@@ -131,6 +209,7 @@ const AuthForm = () => {
         >
           <FormLabel>{t("auth.password")}</FormLabel>
           <Input
+            autoComplete="new-password"
             {...register("password")}
             onChange={(e) => setPasswordVal(e.currentTarget.value)}
             name="password"
@@ -142,28 +221,28 @@ const AuthForm = () => {
             !patternUpperCase.test(passwordVal) ? (
               <>
                 <Text mt={2} className="text-danger">
-                  {t("passwordErrors.0")}{" "}
+                  {t("auth.passwordErrors.0")}
                 </Text>
                 <UnorderedList>
                   {patternMin.test(passwordVal) ? (
                     ""
                   ) : (
                     <ListItem ml={3} className="text-danger">
-                      {t("passwordErrors.1")}
+                      {t("auth.passwordErrors.1")}
                     </ListItem>
                   )}
                   {patternNum.test(passwordVal) ? (
                     ""
                   ) : (
                     <ListItem ml={3} className="text-danger">
-                      {t("passwordErrors.2")}
+                      {t("auth.passwordErrors.2")}
                     </ListItem>
                   )}
                   {patternUpperCase.test(passwordVal) ? (
                     ""
                   ) : (
                     <ListItem ml={3} className="text-danger">
-                      {t("passwordErrors.3")}
+                      {t("auth.passwordErrors.3")}
                     </ListItem>
                   )}
                 </UnorderedList>
@@ -194,4 +273,4 @@ const AuthForm = () => {
   );
 };
 
-export default AuthForm;
+export default RegisterForm;

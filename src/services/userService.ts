@@ -7,6 +7,8 @@ export interface User {
     email: string;
     password: string;
     country: string;
+    username: string;
+    bought_answers: number[];
 }
 
 const userService = new APIClient<User>("users");

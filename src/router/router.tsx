@@ -4,6 +4,7 @@ import Error from "../UI/layout/components/Error";
 import HomePage from "../UI/pages/HomePage";
 import SignInPage from "../UI/pages/SignInPage";
 import SignUpPage from "../UI/pages/SignUpPage";
+import AccountPage from "../UI/pages/AccountPage";
 
 const router = createBrowserRouter([
   {
@@ -20,8 +21,12 @@ const router = createBrowserRouter([
         element: <SignInPage />
       },
       {
-        path: '/register',
+        path: 'register',
         element: <SignUpPage />
+      },
+      {
+        path: 'account',
+        element: <AccountPage />
       }
     ],
   },

@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { isRouteErrorResponse, useRouteError } from "react-router-dom"
 
 const Error = () => {
@@ -6,7 +7,9 @@ const Error = () => {
     const isNotFound = isRouteErrorResponse(error);
 
   return (
-    <div>Error</div>
+    <p>
+      {isNotFound ? '404 route doesnt exist' : (error instanceof AxiosError ? error.response?.data : 'server error')}
+    </p>
   )
 }
 

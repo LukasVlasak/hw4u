@@ -13,7 +13,13 @@ import {
   PopoverTrigger,
   PopoverContent,
   useDisclosure,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  useToast,
 } from "@chakra-ui/react";
+import { FaRegUser } from "react-icons/fa";
 import { FaChevronRight } from "react-icons/fa";
 import { HiMiniChevronDown } from "react-icons/hi2";
 import { GiHamburgerMenu } from "react-icons/gi";
@@ -21,11 +27,33 @@ import { IoMdClose } from "react-icons/io";
 import Headroom from "react-headroom";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import useAuth from "../../../hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function NavBar() {
   const { isOpen, onToggle } = useDisclosure();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { isError, isFetching } = useAuth();
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  const handleSignOut = () => {
+    localStorage.removeItem("x-auth-token");
+    navigate("/");
+    toast({
+      status: 'success',
+      duration: 5000,
+      isClosable: true,
+      title: t("auth.successSignOut"),
+      description: t("auth.successSignOutDesc")
+    })
+    setTimeout(() => {}, 50); // aby localstorage stihlo odstranit a neblblo to
+    queryClient.invalidateQueries({
+      queryKey: ["auth"],
+    });
+  };
+
   return (
     <Headroom pinStart={60}>
       {" "}
@@ -35,6 +63,8 @@ export default function NavBar() {
           backgroundColor={"brand.bgColor"}
           color={"white"}
           minH={"60px"}
+          borderBottomWidth={{ base: "1px", md: "0px" }}
+          borderBottomColor={{ base: "grey.100", md: "none" }}
           alignItems={"center"}
           py={{ base: 2 }}
           px={{ base: 4 }}
@@ -61,12 +91,14 @@ export default function NavBar() {
           >
             <IconButton
               onClick={onToggle}
-              _hover={{bg: 'transparent'}}
+              _hover={{ bg: "transparent" }}
               icon={
                 isOpen ? (
-                  <IoMdClose style={{color: 'white', fontSize: '25px'}}/>
+                  <IoMdClose style={{ color: "white", fontSize: "25px" }} />
                 ) : (
-                  <GiHamburgerMenu style={{color: 'white', fontSize: '25px'}} />
+                  <GiHamburgerMenu
+                    style={{ color: "white", fontSize: "25px" }}
+                  />
                 )
               }
               variant={"ghost"}
@@ -79,35 +111,74 @@ export default function NavBar() {
             </Flex>
           </Flex>
 
-          <Stack
-            flex={{ base: 1, md: 0 }}
-            justify={"flex-end"}
-            direction={"row"}
-            spacing={6}
-            alignItems={"center"}
-          >
-            <Button
-              fontSize={"md"}
-              fontWeight={400}
-              variant={"link"}
-              color={"grey.200"}
-            >
-              <Link to={"/login"}>{t("auth.signIn")}</Link>
-            </Button>
-            <Button
-              display={{ hideSignUp: "inline-flex", md: "none", base: "none" }}
-              fontSize={"md"}
-              fontWeight={600}
-              color={"white"}
-              bg={"transparent"}
-              onClick={() => navigate("/register")}
-              border={"2px solid white"}
-              _hover={{color: 'brand.hoverBlueColor'}}
-              _focus={{bg: 'transparent'}}
-            >
-              <Link to={"/register"}>{t("auth.signUp")}</Link>
-            </Button>
-          </Stack>
+          {!isFetching ? (
+            isError ? (
+              <Stack
+                flex={{ base: 1, md: 0 }}
+                justify={"flex-end"}
+                direction={"row"}
+                spacing={6}
+                alignItems={"center"}
+              >
+                <Button
+                  fontSize={"md"}
+                  fontWeight={400}
+                  variant={"link"}
+                  color={"grey.200"}
+                >
+                  <Link to={"/login"}>{t("auth.signIn")}</Link>
+                </Button>
+                <Button
+                  display={{
+                    hideSignUp: "inline-flex",
+                    md: "none",
+                    base: "none",
+                  }}
+                  fontSize={"md"}
+                  fontWeight={600}
+                  color={"white"}
+                  bg={"transparent"}
+                  onClick={() => navigate("/register")}
+                  border={"2px solid white"}
+                  _hover={{ color: "brand.hoverBlueColor" }}
+                  _focus={{ bg: "transparent" }}
+                >
+                  <Link to={"/register"}>{t("auth.signUp")}</Link>
+                </Button>
+              </Stack>
+            ) : (
+              <Menu>
+                <MenuButton
+                  aria-label="User account options"
+                  /* _expanded={} */ _active={{
+                    color: "white",
+                    backgroundColor: "transparent",
+                  }}
+                  _hover={{ backgroundColor: "transparent" }}
+                  backgroundColor={"transparent"}
+                  color={"white"}
+                  as={IconButton}
+                  icon={<FaRegUser />}
+                >
+                  Actions
+                </MenuButton>
+                <MenuList color={"black"}>
+                  <Link role="group" to={"/account"}>
+                    <MenuItem _groupHover={{color: "brand.hoverBlueColor"}}>{t("account.account")}</MenuItem>
+                  </Link>
+                  <Link role="group" to={"/ask"}>
+                    <MenuItem _groupHover={{color: "brand.hoverBlueColor"}}>{t("tasks.askAQuestion")}</MenuItem>
+                  </Link>
+                  <Link role="group" to={"/subscripe"}>
+                    <MenuItem _groupHover={{color: "brand.hoverBlueColor"}}>{t("subscripe.subscripe")}</MenuItem>
+                  </Link>
+                  <MenuItem _hover={{color: "brand.hoverBlueColor"}} onClick={handleSignOut}>
+                    {t("auth.signOut")}
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            )
+          ) : null}
         </Flex>
 
         <Collapse in={isOpen} animateOpacity>
@@ -197,7 +268,12 @@ const DesktopSubNav = ({ label, href, subLabel }: NavItem) => {
           align={"center"}
           flex={1}
         >
-          <Icon color={"brand.hoverBlueColor"} w={5} h={5} as={FaChevronRight} />
+          <Icon
+            color={"brand.hoverBlueColor"}
+            w={5}
+            h={5}
+            as={FaChevronRight}
+          />
         </Flex>
       </Stack>
     </Box>
@@ -206,7 +282,13 @@ const DesktopSubNav = ({ label, href, subLabel }: NavItem) => {
 
 const MobileNav = () => {
   return (
-    <Stack bg={"white"} borderWidth={'1px'} borderColor={'grey.200'} p={4} display={{ md: "none" }}>
+    <Stack
+      bg={"white"}
+      borderWidth={"1px"}
+      borderColor={"grey.200"}
+      p={4}
+      display={{ md: "none" }}
+    >
       {NAV_ITEMS_MOBILE.map((navItem, i) => (
         <MobileNavItem index={i} key={navItem.label} {...navItem} />
       ))}
@@ -219,31 +301,39 @@ const MobileNavItem = ({ label, children, href, index }: NavItem) => {
 
   return (
     <Stack spacing={0} onClick={children && onToggle} fontSize={"sm"}>
-      <Box
-        mt={index === 0 ? 0 : 6}
-        pb={0}
-        height={"30px !important"}
-        justifyContent="space-between"
-        display="flex"
-        alignItems="center"
-        _hover={{
-          textDecoration: "none",
-        }}
-      >
-        <Text _hover={children ? {} : {color: 'brand.hoverBlueColor'}} py={0} fontWeight={600} color={"gray.600"}>
-          <Link to={href ?? "#"}>{label}</Link>
-        </Text>
-        {children && (
-          <Icon
-            as={HiMiniChevronDown}
-            transition={"all .25s ease-in-out"}
-            transform={isOpen ? "rotate(180deg)" : ""}
-            w={6}
-            h={6}
-          />
-        )}
-      </Box>
-
+      <Link to={href ?? "#"}>
+        <Box
+          mt={index === 0 ? 0 : 6}
+          pb={0}
+          height={"30px !important"}
+          justifyContent="space-between"
+          display="flex"
+          alignItems="center"
+          role="group"
+          // _hover={{
+          //   textDecoration: "none",
+          //   color: "red"
+          // }}
+        >
+          <Text
+            _groupHover={{ color: "brand.hoverBlueColor" }}
+            py={0}
+            fontWeight={600}
+            color={"gray.600"}
+          >
+            {label}
+          </Text>
+          {children && (
+            <Icon
+              as={HiMiniChevronDown}
+              transition={"all .25s ease-in-out"}
+              transform={isOpen ? "rotate(180deg)" : ""}
+              w={6}
+              h={6}
+            />
+          )}
+        </Box>
+      </Link>
       <Collapse in={isOpen} animateOpacity>
         <Stack
           mt={2}
@@ -255,9 +345,16 @@ const MobileNavItem = ({ label, children, href, index }: NavItem) => {
         >
           {children &&
             children.map((child) => (
-              <Box _hover={{color: 'brand.hoverBlueColor', cursor: 'pointer'}} key={child.label} py={2}>
-                <Link to={child.href ?? "#"}>{child.label}</Link>
-              </Box>
+              <Link style={{width: "100%"}} key={child.label} to={child.href ?? "#"}>
+                <Box
+                  _hover={{ color: "brand.hoverBlueColor", cursor: "pointer" }}
+                  key={child.label}
+                  py={2}
+                  width={'100%'}
+                >
+                  {child.label}{" "}
+                </Box>
+              </Link>
             ))}
         </Stack>
       </Collapse>
@@ -299,12 +396,14 @@ const NAV_ITEMS: Array<NavItem> = [
       },
       {
         label: "Podívej se na zodpovězené otázky",
-        subLabel: "Koukni se komu už naše stránka pomohla a třeba najdeš odpověď na svůj problém",
+        subLabel:
+          "Koukni se komu už naše stránka pomohla a třeba najdeš odpověď na svůj problém",
         href: "/answeredQuestions",
       },
       {
         label: "Uživatelé",
-        subLabel: "Podívej se na to, v čem jsou naši uživatelé vzdělaní a můžeš je přímo požádat o pomoc",
+        subLabel:
+          "Podívej se na to, v čem jsou naši uživatelé vzdělaní a můžeš je přímo požádat o pomoc",
         href: "/users",
       },
     ],
@@ -322,7 +421,7 @@ const NAV_ITEMS: Array<NavItem> = [
 const NAV_ITEMS_MOBILE: Array<NavItem> = [
   {
     label: "Domů",
-    href: '/'
+    href: "/",
   },
   {
     label: "Vydělávej peníze",
@@ -349,12 +448,14 @@ const NAV_ITEMS_MOBILE: Array<NavItem> = [
       },
       {
         label: "Podívej se na zodpovězené otázky",
-        subLabel: "Koukni se komu už naše stránka pomohla a třeba najdeš odpověď na svůj problém",
+        subLabel:
+          "Koukni se komu už naše stránka pomohla a třeba najdeš odpověď na svůj problém",
         href: "/answeredQuestions",
       },
       {
         label: "Uživatelé",
-        subLabel: "Podívej se na to, v čem jsou naši uživatelé vzdělaní a můžeš je přímo požádat o pomoc",
+        subLabel:
+          "Podívej se na to, v čem jsou naši uživatelé vzdělaní a můžeš je přímo požádat o pomoc",
         href: "/users",
       },
     ],
@@ -367,4 +468,4 @@ const NAV_ITEMS_MOBILE: Array<NavItem> = [
     label: "Podpora / FAQ",
     href: "/faq",
   },
-]
+];
