@@ -26,7 +26,7 @@ const AccountPage = () => {
   if (isLoading) return <p>Loading...</p>
 
   return (
-    data ? <p>{data[0].name} <span><button onClick={handleLogOut}>Log out</button></span></p> : <p>Loading...</p>
+    data ? <p>{data[0].country} <span><button onClick={handleLogOut}>Log out</button></span></p> : <p>Loading...</p>
   )
 };
 

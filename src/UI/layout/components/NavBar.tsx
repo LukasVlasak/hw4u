@@ -27,19 +27,16 @@ import { IoMdClose } from "react-icons/io";
 import Headroom from "react-headroom";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import useAuth from "../../../hooks/useAuth";
-import { useQueryClient } from "@tanstack/react-query";
+import useAuth, { useLogout } from "../../../hooks/useAuth";
 
 export default function NavBar() {
   const { isOpen, onToggle } = useDisclosure();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { isError, isFetching } = useAuth();
-  const queryClient = useQueryClient();
   const toast = useToast();
-
-  const handleSignOut = () => {
-    localStorage.removeItem("x-auth-token");
+  const { mutate } = useLogout(() => {
+    // callback
     navigate("/");
     toast({
       status: 'success',
@@ -48,10 +45,10 @@ export default function NavBar() {
       title: t("auth.successSignOut"),
       description: t("auth.successSignOutDesc")
     })
-    setTimeout(() => {}, 50); // aby localstorage stihlo odstranit a neblblo to
-    queryClient.invalidateQueries({
-      queryKey: ["auth"],
-    });
+  });
+
+  const handleSignOut = () => {
+    mutate();
   };
 
   return (

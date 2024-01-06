@@ -2,6 +2,7 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:3001/api/",
+  withCredentials: true,
 });
 
 export interface ErrorCode {
@@ -22,8 +23,7 @@ class APIClient<T extends Entity> {
   }
 
   getAll() {
-    const token = localStorage.getItem("x-auth-token"); // toto pred vsemi requesty - ale spis predelat na nejakej global storage
-
+    const token = localStorage.getItem("x-auth-token"); // toto pred vsemi requesty - ale spis predelat na nejakej global storage a dat do headers pri vytvareni axios instance
     return axiosInstance
       .get<T[]>(this.endpoint, {
         headers: {
@@ -40,7 +40,13 @@ class APIClient<T extends Entity> {
   }
 
   post(data: T) {
-    return axiosInstance.post<T>(this.endpoint, data).then((res) => res);
+    const token = localStorage.getItem("x-auth-token"); // toto pred vsemi requesty - ale spis predelat na nejakej global storage a dat do headers pri vytvareni axios instance
+
+    return axiosInstance.post<T>(this.endpoint, data, {
+      headers: {
+        "x-auth-token": token
+      }
+    }).then((res) => res);
   }
 
   update(data: T) {

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import authService from "../services/authService";
 import { AxiosError, AxiosResponse } from "axios";
 import { User } from "../services/userService";
-import { ErrorCode } from "../services/api-client";
+import APIClient, { ErrorCode } from "../services/api-client";
 
 const useAuth = () => {  
     return useQuery<User[], AxiosError, User[]>({
@@ -40,6 +40,29 @@ export const useLogin = (callback?: () => void) => {
       if (error.response?.status === 400) return false;
       else return true; 
     },
+  })
+}
+
+export const useLogout = (callback?: () => void) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => {
+      return new APIClient("auth/logout").post({} as User);
+    },
+    onSuccess() {
+      localStorage.removeItem("x-auth-token");
+      setTimeout(() => {}, 50); // aby localstorage stihlo odstranit a neblblo to
+
+      queryClient.invalidateQueries({
+        queryKey: ['auth'],
+      });
+
+      if (callback) {
+        callback();
+      }
+    },
+    throwOnError: true
   })
 }
 

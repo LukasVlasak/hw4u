@@ -34,6 +34,7 @@ i18n
             signOut: "Sign out",
             successSignOutDesc: "You have been logged out",
             successSignOut: "Success",
+            rememberMe: "Remember me",
             usernameErrors: {
                 1: "Username must contains at least 3 characters",
                 2: "Username can contains only 15 characters",
@@ -94,6 +95,7 @@ i18n
             signOut: "Odhlásit se",
             successSignOutDesc: "Byl jste úspěšně odhlášen",
             successSignOut: "Úspěšné odhlášení",
+            rememberMe: "Zapamatuj si mě",
             usernameErrors: {
                 1: "Uživatelské jméno musí obsahovat nejméně 3 znaky",
                 2: "Uživatelské jméno může obsahovat maximálně 15 znaků",

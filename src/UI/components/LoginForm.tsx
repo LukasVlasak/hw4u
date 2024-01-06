@@ -1,5 +1,6 @@
 import {
   Button,
+  Checkbox,
   Flex,
   FormControl,
   FormErrorMessage,
@@ -19,6 +20,7 @@ import { useEffect } from "react";
 interface FormData {
   email: string;
   password: string;
+  rememberMe: boolean;
 }
 
 const Form = styled("form")({
@@ -122,6 +124,7 @@ const LoginForm = () => {
             <FormErrorMessage>{t("errors.required")}</FormErrorMessage>
           ) : null}
         </FormControl>
+        <Checkbox mt={4} {...register("rememberMe")} defaultChecked>{t("auth.rememberMe")}</Checkbox>
         <Button type="submit" mt={6} mb={3} colorScheme="blue">
           {t("auth.submit")}
         </Button>
