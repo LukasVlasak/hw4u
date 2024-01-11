@@ -1,6 +1,6 @@
 import APIClient from "./api-client";
 
-interface Task {
+export interface Task {
     id: number;
     title: string;
     willing_to_pay: number;
@@ -10,6 +10,15 @@ interface Task {
     description: string;
     for_user_id?: number;
     created_date?: Date;
+}
+
+export enum TaskCategory {
+    quality = "Quality Assurance",
+    marketing = "Marketing"
+}
+export type TaskType = {
+    quality: "Quality Assurance",
+    marketing: "Marketing"
 }
 
 const taskService = new APIClient<Task>("tasks");

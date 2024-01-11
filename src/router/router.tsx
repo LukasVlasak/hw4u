@@ -5,6 +5,7 @@ import HomePage from "../UI/pages/HomePage";
 import SignInPage from "../UI/pages/SignInPage";
 import SignUpPage from "../UI/pages/SignUpPage";
 import AccountPage from "../UI/pages/AccountPage";
+import TaskPage from "../UI/pages/TaskPage";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: 'account',
         element: <AccountPage />
+      },
+      {
+        path: 'tasks',
+        element: <TaskPage/>
       }
     ],
   },

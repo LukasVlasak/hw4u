@@ -20,16 +20,16 @@ class APIClient<T extends Entity> {
 
   constructor(endpoint: string) {
     this.endpoint = endpoint;
+    const token = localStorage.getItem("x-auth-token");
+    axiosInstance.interceptors.request.use((config) => {
+      config.headers["x-auth-token"] = token;
+      return config;
+    })
   }
 
   getAll() {
-    const token = localStorage.getItem("x-auth-token"); // toto pred vsemi requesty - ale spis predelat na nejakej global storage a dat do headers pri vytvareni axios instance
     return axiosInstance
-      .get<T[]>(this.endpoint, {
-        headers: {
-          "x-auth-token": token,
-        },
-      })
+      .get<T[]>(this.endpoint)
       .then((res) => res.data);
   }
 
@@ -40,13 +40,7 @@ class APIClient<T extends Entity> {
   }
 
   post(data: T) {
-    const token = localStorage.getItem("x-auth-token"); // toto pred vsemi requesty - ale spis predelat na nejakej global storage a dat do headers pri vytvareni axios instance
-
-    return axiosInstance.post<T>(this.endpoint, data, {
-      headers: {
-        "x-auth-token": token
-      }
-    }).then((res) => res);
+    return axiosInstance.post<T>(this.endpoint, data).then((res) => res);
   }
 
   update(data: T) {
