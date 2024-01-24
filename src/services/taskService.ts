@@ -12,13 +12,18 @@ export interface Task {
     created_date?: Date;
 }
 
-export enum TaskCategory {
-    quality = "Quality Assurance",
-    marketing = "Marketing"
-}
-export type TaskType = {
+export const TaskCategoryObj = {
     quality: "Quality Assurance",
-    marketing: "Marketing"
+    marketing: "Marketing",
+    development: "Development",
+    neco: "Neco jinyho"
+}
+
+export const TaskCategoryObj2 = {
+    math: "Math",
+    geo: "Geo",
+    cj: "Cj",
+    aj: "Aj"
 }
 
 const taskService = new APIClient<Task>("tasks");

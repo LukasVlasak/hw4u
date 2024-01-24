@@ -1,18 +1,18 @@
 import useTasks from "../../hooks/useTasks";
-import { Task, TaskCategory, TaskType } from "../../services/taskService";
+import { Task, TaskCategoryObj, TaskCategoryObj2 } from "../../services/taskService";
 import LoadingComponents from "../components/LoadingComponents";
-import TasksList from "../components/TasksList";
+import DataGrid from "../components/DataGrid";
 
 const TaskPage = () => {
-  console.log();
 
   const { data, isLoading } = useTasks();
-  console.log(data);
+  
   if (isLoading) return <LoadingComponents />;
 
   return data ? (
-    <TasksList<Task, TaskType>
+    <DataGrid<Task, [typeof TaskCategoryObj, typeof TaskCategoryObj2]>
       rows={data}
+      pagination={{defaultPageSize: 10, pageSizesToChoose: [5, 10, 15, 20]}}
       columns={[
         "Titul",
         "Ochoten Zaplatit",
@@ -20,9 +20,37 @@ const TaskPage = () => {
         "Popis",
         "Do data",
         "Pro uzivatele",
+        "Category 2",
+        "Created"
       ]}
       sort
-      filters={[{dataKey: "category", props: {type: 'category', categoryEnum: 'all'}}, {dataKey: "title", props: {type: 'category', categoryEnum: ['marketing']}}]}
+      search={['title', 'due_date']}
+      filters={[
+        {
+          dataKey: "willing_to_pay",
+          name: "Ochoten zaplatit",
+          props: {
+            type: "number",
+            start: Math.min(...data.map((d) => d.willing_to_pay)),
+            end: Math.max(...data.map((d) => d.willing_to_pay)),
+          },
+        },
+        {
+          dataKey: "category",
+          name: "Kategori2",
+          props: {
+            type: "category",
+            categoryEnum: TaskCategoryObj
+          }
+        },
+        {
+          dataKey: "due_date",
+          name: "Do dne",
+          props: {
+            type: "date",
+          }
+        }
+      ]}
     />
   ) : null;
 };

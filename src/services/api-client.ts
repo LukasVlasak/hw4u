@@ -15,6 +15,11 @@ interface Entity {
   id: number;
 }
 
+interface QueryObject {
+  _start: number;
+  _limit: number;
+}
+
 class APIClient<T extends Entity> {
   private endpoint: string;
 
@@ -24,12 +29,12 @@ class APIClient<T extends Entity> {
     axiosInstance.interceptors.request.use((config) => {
       config.headers["x-auth-token"] = token;
       return config;
-    })
+    });
   }
 
-  getAll() {
+  getAll(queryObject?: QueryObject) {
     return axiosInstance
-      .get<T[]>(this.endpoint)
+      .get<T[]>(this.endpoint, queryObject ? { params: queryObject } : {})
       .then((res) => res.data);
   }
 

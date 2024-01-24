@@ -1,14 +1,28 @@
+import MultiRangeSlider from "./MultiRangeSlider";
 
-interface Props {
-    start: number;
-    end: number;
-    onChange: (maxValue: number, minValue: number) => void;
+interface Props<T> {
+  start: number;
+  end: number;
+  onChange: (data: T[]) => void;
+  dataKey: keyof T;
+  data: T[];
 }
 
-const NumberFilter = ({start, end, onChange}: Props) => {
+function NumberFilter<T>({ start, end, onChange, data, dataKey }: Props<T>) {
   return (
-    <div>NumberFilter</div>
-  )
+    <MultiRangeSlider
+      min={start}
+      max={end}
+      onChange={(min, max) =>
+        onChange(
+          data.filter(
+            (r) =>
+              (r[dataKey] as number) <= max && (r[dataKey] as number) >= min
+          )
+        )
+      }
+    />
+  );
 }
 
-export default NumberFilter
+export default NumberFilter;
