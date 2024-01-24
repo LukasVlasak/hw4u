@@ -61,7 +61,7 @@ interface Props<T, K extends any[]> {
   pagination?: Pagination;
 }
 
-function DataGrid<T extends {}, K extends any[] = undefined[]>({
+function DataGrid<T extends {}, K extends any[]>({
   columns,
   rows,
   sort,

@@ -8,9 +8,10 @@ const ServerSideFiltering = () => {
 
   return (
     // form
-
+    <DataGrid<Task> 
+        
+    />
     // datagrid - rows
-   
   )
 }
 
