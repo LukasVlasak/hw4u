@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import _ from "lodash";
+import { Checkbox, Text } from "@chakra-ui/react";
 
 interface Props<T, K extends Record<string, string>> {
   onChange: (data: T[]) => void;
@@ -23,9 +24,8 @@ function CategoryFilter<T, K extends Record<string, string>>({
   data,
   name,
   category,
-  setCategory
+  setCategory,
 }: Props<T, K>) {
-
   const mounted = useRef(false);
 
   const handleCategoryChange = (
@@ -50,10 +50,10 @@ function CategoryFilter<T, K extends Record<string, string>>({
       let filteredByCategories: T[] | undefined = undefined;
 
       if (category && category.length > 0) {
-        let arraysOfFilteredData = category.map(c =>
-          data.filter(d => d[c.dataKey] === c.category)
+        let arraysOfFilteredData = category.map((c) =>
+          data.filter((d) => d[c.dataKey] === c.category)
         );
-        filteredByCategories = _.intersection(...arraysOfFilteredData)
+        filteredByCategories = _.intersection(...arraysOfFilteredData);
       }
       onChange(filteredByCategories || filteredArray);
     }
@@ -62,18 +62,19 @@ function CategoryFilter<T, K extends Record<string, string>>({
 
   return (
     <div>
-      <span>{name}</span>
+      <Text mb={2}>{name}</Text>
       {Object.values(categories).map((c, i) => {
         return (
           <div key={i}>
-            <label>{c}</label>
-            <input
-              type="checkbox"
+            <Checkbox
+              spacing={'3'}
               value={c}
               onChange={(e) => {
                 handleCategoryChange(c, dataKey, e.currentTarget.checked);
               }}
-            />
+            >
+              {c}
+            </Checkbox>
           </div>
         );
       })}

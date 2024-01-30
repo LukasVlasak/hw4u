@@ -18,6 +18,8 @@ interface Entity {
 interface QueryObject {
   _start: number;
   _limit: number;
+  orderBy: string;
+  where: string;
 }
 
 class APIClient<T extends Entity> {
@@ -32,7 +34,7 @@ class APIClient<T extends Entity> {
     });
   }
 
-  getAll(queryObject?: QueryObject) {
+  getAll(queryObject?: Partial<QueryObject>) {
     return axiosInstance
       .get<T[]>(this.endpoint, queryObject ? { params: queryObject } : {})
       .then((res) => res.data);

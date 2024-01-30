@@ -377,6 +377,11 @@ const NAV_ITEMS: Array<NavItem> = [
         href: "/tasks",
       },
       {
+        label: "Archiv otazek",
+        subLabel: "Za to jsou lidé schopni utrácet opraklvdu hodně",
+        href: "/tasks_archive",
+      },
+      {
         label: "Pozvi kámaše",
         subLabel: "Pozvi kámoše pomocí speciálního linku",
         href: "/invite",

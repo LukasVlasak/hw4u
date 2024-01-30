@@ -3,6 +3,8 @@
 
 import {
   Button,
+  Container,
+  Flex,
   Table,
   TableContainer,
   Tbody,
@@ -10,14 +12,18 @@ import {
   Th,
   Thead,
   Tr,
+  Text,
 } from "@chakra-ui/react";
 import _ from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import CategoryFilter from "./CategoryFilter";
 import DateFilter from "./DateFilter";
 import NumberFilter from "./NumberFilter";
 import SearchFilter from "./SearchFilter";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import React from "react";
+import { FaFilter } from "react-icons/fa6";
 
 interface Pagination {
   defaultPageSize: number;
@@ -53,7 +59,7 @@ interface Filters<T, K extends any[]> {
 }
 
 interface Props<T, K extends any[]> {
-  columns: string[];
+  columns: string[] | "keyof T";
   rows: T[];
   sort?: boolean;
   search?: (keyof T)[];
@@ -61,7 +67,7 @@ interface Props<T, K extends any[]> {
   pagination?: Pagination;
 }
 
-function DataGrid<T extends {}, K extends any[]>({
+function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
   columns,
   rows,
   sort,
@@ -73,8 +79,6 @@ function DataGrid<T extends {}, K extends any[]>({
   const [pageSize, setPageSize] = useState(
     pagination && pagination.defaultPageSize
   );
-  console.log(page);
-  console.log(pageSize);
   const [renderedRows, setRenderedRows] = useState(rows);
   const [filteredByMultiRange, setFilteredByMultiRange] = useState<T[]>();
   const [filteredByCategory, setFilteredByCategory] = useState<T[]>();
@@ -88,6 +92,17 @@ function DataGrid<T extends {}, K extends any[]>({
   );
   const [lastClicked, setLastedClicked] = useState<number>();
 
+  const [cFilterShow, setCFilterShow] = useState(false);
+  const [nFilterShow, setNFilterShow] = useState(false);
+  const [dFilterShow, setDFilterShow] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const categoryFilterBtn = useRef<HTMLButtonElement>(null);
+  const categoryFilterContainer = useRef<HTMLDivElement>(null);
+
+  const [isHoveringTh, setIsHoveringTh] = useState<number>(); // kvuli zobrazovani sipky na hover
+
+  const rendrededColumns =
+    columns === "keyof T" ? Object.keys(rows[0]) : columns;
   /**
    *
    * @param columnNumber cislo sloupce, ktery je sortovan
@@ -101,17 +116,16 @@ function DataGrid<T extends {}, K extends any[]>({
     sortOrder: number
   ): T[] => {
     if (sortOrder === 0) {
-      console.log("stop sorting");
       return forSorting;
     }
 
     forSorting.sort((a, b) => {
       const ai = Object.values(a).map((k, i) => i === columnNumber && k)[
         columnNumber
-      ] as string;
+      ] as unknown as string;
       const bi = Object.values(b).map((k, i) => i === columnNumber && k)[
         columnNumber
-      ] as string;
+      ] as unknown as string;
 
       if (ai < bi) {
         return sortOrder === 1 ? -1 : 1;
@@ -135,8 +149,6 @@ function DataGrid<T extends {}, K extends any[]>({
   };
 
   useEffect(() => {
-    //console.log(filteredByDate);
-
     let rRows = _.intersection(
       filteredByMultiRange || rows,
       filteredByCategory || rows,
@@ -145,7 +157,6 @@ function DataGrid<T extends {}, K extends any[]>({
     );
 
     if (lastClicked) {
-      console.log("sorting");
       rRows = sortFn(lastClicked, rRows, ascOrder[lastClicked]);
     }
 
@@ -160,161 +171,284 @@ function DataGrid<T extends {}, K extends any[]>({
   ]);
 
   useEffect(() => {
-    if (pagination && pageSize) {
-      const totalRows = renderedRows.length;
-      const totalPages = Math.ceil(totalRows / pageSize);
-    
-      if (page > totalPages) {
-        setPage(totalPages);
-      }
-    }
+    console.log(pageSize);
+
+    // if (pagination && pageSize) {
+    //   const totalRows = renderedRows.length;
+    //   const totalPages = Math.ceil(totalRows / pageSize);
+
+    //   if (page > totalPages) {
+    //     setPage(totalPages);
+    //   }
+    // }
   }, [renderedRows, pageSize, page, pagination]);
 
+  const handleHideClick = (e: MouseEvent) => {
+    if (
+      e.target !== categoryFilterContainer.current &&
+      e.target !== categoryFilterBtn.current &&
+      !categoryFilterContainer.current?.contains(e.target as Node)
+    ) {
+      setCFilterShow(false);
+    }
+  };
+  useEffect(() => {
+    window.addEventListener("click", handleHideClick);
+
+    return () => window.removeEventListener("click", handleHideClick);
+  });
+
   return (
-    <>
-      {/* filters */}
-      {filters
-        ? filters.map((f, i) => {
-            if (f.props.type === "category")
-              return (
-                <div key={i}>
-                  <CategoryFilter<T, typeof f.props.categoryEnum>
-                    onChange={setFilteredByCategory}
-                    categories={f.props.categoryEnum}
-                    dataKey={f.dataKey}
-                    name={f.name}
-                    data={rows}
-                    setCategory={setCategory}
-                    category={category}
-                  />
-                </div>
-              );
-            else if (f.props.type === "number")
-              return (
-                <div key={i}>
-                  <span>{f.name}</span>
-                  <NumberFilter<T>
-                    key={i}
-                    onChange={setFilteredByMultiRange}
-                    start={f.props.start}
-                    end={f.props.end}
-                    data={rows}
-                    dataKey={f.dataKey}
-                  />
-                </div>
-              );
-            else if (f.props.type === "date") {
-              return (
-                <div key={i}>
-                  <span>{f.name}</span>
-                  <DateFilter<T>
-                    data={rows}
-                    dataKey={f.dataKey}
-                    onChange={setFilteredByDate}
-                    key={i}
-                  />
-                </div>
-              );
-            } else return null;
-          })
-        : null}
+    <Container
+      margin={0}
+      padding={"50px"}
+      minWidth={"100%"}
+      minHeight={"100%"}
+      backgroundColor={"grey.300"}
+    >
+      <Flex
+        backgroundColor={"white"}
+        flexDirection={"column"}
+        borderWidth={"1px"}
+        borderColor={"grey.200"}
+        padding={"20px"}
+        borderRadius={"10px"}
+      >
+        {/* filters */}
+        <Flex
+          id="filters"
+          flexDirection={"row"}
+          justifyContent={"space-between"}
+          paddingBottom={"10px"}
+        >
+          {/* search */}
+          {search ? (
+            <SearchFilter<T>
+              data={rows}
+              searchInValues={search}
+              onSearch={setFilteredBySearch}
+            />
+          ) : null}
+          <Flex>
+            {filters ? (
+              <Button onClick={() => setShowFilters(!showFilters)}>
+                <FaFilter />
+                Filter
+              </Button>
+            ) : null}
+          </Flex>
+        </Flex>
 
-      {/* search */}
-      {search ? (
-        <SearchFilter<T>
-          data={rows}
-          searchInValues={search}
-          onSearch={setFilteredBySearch}
-        />
-      ) : null}
-
-      {renderedRows ? (
-        <TableContainer maxWidth={"90%"} margin={"0 auto"}>
-          <Table>
-            <Thead _hover={sort ? { cursor: "pointer" } : {}}>
-              <Tr>
-                {columns.map((c, i) => {
-                  return (
-                    <Th onClick={() => handleSortClick(i)} key={i}>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          alignItems: "center",
-                        }}
+          <Flex display={showFilters && filters ? "flex" : "none"} padding={"30px"} backgroundColor={"grey.200"} mb={3}>
+            {filters?.map((f, i) => {
+              if (f.props.type === "number")
+                return (
+                  <React.Fragment key={i}>
+                    <Button
+                      maxWidth={"fit-content"}
+                      onClick={() => setNFilterShow(!nFilterShow)}
+                    >
+                      {f.name}
+                    </Button>
+                    <Container
+                      maxWidth={"fit-content"}
+                      borderColor={"grey.200"}
+                      boxShadow={"1px"}
+                      borderWidth={"1px"}
+                      borderRadius={"10px"}
+                      display={nFilterShow ? "block" : "none"}
+                      key={i}
+                    >
+                      <NumberFilter<T>
+                        key={i}
+                        onChange={setFilteredByMultiRange}
+                        start={f.props.start}
+                        end={f.props.end}
+                        data={rows}
+                        dataKey={f.dataKey}
+                      />
+                    </Container>
+                  </React.Fragment>
+                );
+              else if (f.props.type === "date") {
+                return (
+                  <div key={i}>
+                    <span>{f.name}</span>
+                    <DateFilter<T>
+                      data={rows}
+                      dataKey={f.dataKey}
+                      onChange={setFilteredByDate}
+                      key={i}
+                    />
+                  </div>
+                );
+              }
+              if (f.props.type === "category")
+                return (
+                  <React.Fragment key={i}>
+                    <Button
+                      id="categoryButton"
+                      maxWidth={"fit-content"}
+                      onClick={() => setCFilterShow(!cFilterShow)}
+                      ref={categoryFilterBtn}
+                    >
+                      {f.name}
+                    </Button>
+                    <div
+                      style={
+                        cFilterShow
+                          ? { position: "relative" }
+                          : { display: "none" }
+                      }
+                    >
+                      <Container
+                        ref={categoryFilterContainer}
+                        id="containerCategory"
+                        maxWidth={"fit-content"}
+                        borderColor={"black"}
+                        boxShadow={"1px"}
+                        borderWidth={"1px"}
+                        borderRadius={"10px"}
+                        position={"absolute"}
+                        minW={"170px"}
+                        top={"47px"}
+                        right={"0"}
+                        backgroundColor={"white"}
+                        padding={"18px"}
+                        zIndex={1}
                       >
-                        <span style={{ marginRight: "5px" }}>{c} </span>
-                        {lastClicked === i ? (
-                          ascOrder[i] === 0 ? null : ascOrder[i] === 2 ? (
-                            <FaArrowUp />
-                          ) : (
-                            <FaArrowDown />
-                          )
-                        ) : null}
-                      </div>
-                    </Th>
-                  );
-                })}
-              </Tr>
-            </Thead>
-            <Tbody>
-              {pagination && pageSize
-                ? renderedRows
-                    .slice((page - 1) * pageSize, page * pageSize)
-                    .map((r, i) => {
-                      return (
-                        <Tr key={i}>
-                          {Object.values(r).map((v, i) => {
-                            return <Td key={i}>{v as string}</Td>;
-                          })}
-                        </Tr>
-                      );
-                    })
-                : renderedRows.map((r, i) => {
-                    return (
-                      <Tr key={i}>
-                        {Object.values(r).map((v, i) => {
-                          return <Td key={i}>{v as string}</Td>;
-                        })}
-                      </Tr>
-                    );
-                  })}
-            </Tbody>
-          </Table>
-        </TableContainer>
-      ) : null}
-      {pagination && pageSize ? (
-        <>
-          <span>current page {page}</span>
-          <Button
-            isDisabled={page * pageSize - 1 >= renderedRows.length}
-            onClick={() => setPage(page + 1)}
-          >
-            Next
-          </Button>
-          <Button isDisabled={page <= 1} onClick={() => setPage(page - 1)}>
-            Prev
-          </Button>
-          <select
-            onChange={(e) => setPageSize(parseInt(e.currentTarget.value))}
-            name=""
-            id=""
-          >
-            {pagination.pageSizesToChoose.map((p, i) => {
-              return (
-                <option
-                  key={i}
-                  value={p}
-                  selected={p === pagination.defaultPageSize}
-                >
-                  {p}
-                </option>
-              );
+                        <CategoryFilter<T, typeof f.props.categoryEnum>
+                          onChange={setFilteredByCategory}
+                          categories={f.props.categoryEnum}
+                          dataKey={f.dataKey}
+                          name={f.name}
+                          data={rows}
+                          setCategory={setCategory}
+                          category={category}
+                        />
+                      </Container>
+                    </div>
+                  </React.Fragment>
+                );
+              else return null;
             })}
-          </select>
-        </>
-      ) : null}
-    </>
+          </Flex>
+        {renderedRows ? (
+          renderedRows.length > 0 ? (
+            <TableContainer>
+              <Table>
+                <Thead
+                  backgroundColor={"grey.200"}
+                  _hover={sort ? { cursor: "pointer" } : {}}
+                >
+                  {/* zde bcs u th to nefunguje */}
+                  <Tr>
+                    {/* <div onMouseEnter={(e) => console.log(e.target)}> */}
+                    {rendrededColumns.map((c, i) => {
+                      return (
+                        <Th onClick={() => handleSortClick(i)} key={i}>
+                          <Flex
+                            onMouseEnter={() => setIsHoveringTh(i)}
+                            onMouseLeave={() => setIsHoveringTh(undefined)}
+                            flexDirection={"row"}
+                            alignItems={"center"}
+                          >
+                            <Text
+                              minWidth={"calc(fit-content + 25px)"}
+                              marginRight={"3px"}
+                            >
+                              {c}
+                            </Text>
+                            {lastClicked === i ? (
+                              ascOrder[i] === 0 ? null : ascOrder[i] === 2 ? (
+                                <FaArrowUp />
+                              ) : (
+                                <FaArrowDown />
+                              )
+                            ) : null}
+                            {lastClicked !== i || ascOrder[i] === 0 ? (
+                              <FaArrowDown
+                                opacity={isHoveringTh === i ? "0.5" : "0.2"}
+                              />
+                            ) : null}
+                          </Flex>
+                        </Th>
+                      );
+                    })}
+                    {/* </div> */}
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {pagination && pageSize
+                    ? renderedRows
+                        .slice((page - 1) * pageSize, page * pageSize)
+                        .map((r, i) => {
+                          return (
+                            <Tr
+                              key={r.id}
+                              _hover={{
+                                backgroundColor: "grey.200",
+                                cursor: "pointer",
+                              }}
+                            >
+                              {Object.values(r).map((v, i) => {
+                                return <Td key={i}>{v}</Td>;
+                              })}
+                            </Tr>
+                          );
+                        })
+                    : renderedRows.map((r, i) => {
+                        return (
+                          <Tr key={r.id} _hover={{ backgroundColor: "grey" }}>
+                            {Object.values(r).map((v, i) => {
+                              return <Td key={i}>{v}</Td>;
+                            })}
+                          </Tr>
+                        );
+                      })}
+                </Tbody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Container minW={"100%"}>Nothing to show</Container>
+          )
+        ) : null}
+        {/* pagination */}
+        {pagination && pageSize ? (
+          <Flex flexDir={"row"} justifyContent={"space-between"}>
+            <select
+              onChange={(e) => setPageSize(parseInt(e.currentTarget.value))}
+              defaultValue={pagination.defaultPageSize}
+            >
+              {pagination.pageSizesToChoose.map((p, i) => {
+                return (
+                  <option key={i} value={p}>
+                    {p}
+                  </option>
+                );
+              })}
+            </select>
+            <Flex>
+              <span>
+                {(page - 1) * pageSize + 1} -{" "}
+                {page * pageSize > renderedRows.length
+                  ? renderedRows.length
+                  : page * pageSize}
+              </span>
+              <Button isDisabled={page <= 1} onClick={() => setPage(page - 1)}>
+                <IoIosArrowBack />
+              </Button>
+              <Button
+                isDisabled={page * pageSize - 1 >= renderedRows.length}
+                onClick={() => setPage(page + 1)}
+              >
+                <IoIosArrowForward />
+              </Button>
+            </Flex>
+          </Flex>
+        ) : null}
+      </Flex>
+    </Container>
   );
 }
 

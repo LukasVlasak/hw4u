@@ -6,6 +6,7 @@ import SignInPage from "../UI/pages/SignInPage";
 import SignUpPage from "../UI/pages/SignUpPage";
 import AccountPage from "../UI/pages/AccountPage";
 import TaskPage from "../UI/pages/TaskPage";
+import ServerSideFiltering from "../UI/components/ServerSideFiltering";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
       {
         path: 'tasks',
         element: <TaskPage/>
+      },
+      {
+        path: 'tasks_archive',
+        element: <ServerSideFiltering />
       }
     ],
   },

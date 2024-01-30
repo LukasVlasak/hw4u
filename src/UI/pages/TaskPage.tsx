@@ -36,6 +36,13 @@ const TaskPage = () => {
           },
         },
         {
+          dataKey: "due_date",
+          name: "Do dne",
+          props: {
+            type: "date",
+          }
+        },
+        {
           dataKey: "category",
           name: "Kategori2",
           props: {
@@ -43,13 +50,6 @@ const TaskPage = () => {
             categoryEnum: TaskCategoryObj
           }
         },
-        {
-          dataKey: "due_date",
-          name: "Do dne",
-          props: {
-            type: "date",
-          }
-        }
       ]}
     />
   ) : null;

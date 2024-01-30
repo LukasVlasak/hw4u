@@ -28,7 +28,7 @@ function SearchFilter<T>({ onSearch, searchInValues, data }: Props<T>) {
     onSearch(searchMethod(q));
   };
   return (
-    <FormControl>
+    <FormControl maxW={'250px'}>
       <Input
         onChange={handleSearch}
         id="search"

@@ -13,10 +13,10 @@ export interface Task {
 }
 
 export const TaskCategoryObj = {
-    quality: "Quality Assurance",
+    quality: "Quality",
     marketing: "Marketing",
     development: "Development",
-    neco: "Neco jinyho"
+    neco: "Neco"
 }
 
 export const TaskCategoryObj2 = {

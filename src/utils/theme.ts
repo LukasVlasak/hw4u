@@ -15,6 +15,11 @@ const theme = extendTheme({
         blue: {
             600: '#002984',
             500: '#3f51b5'
+        },
+        grey: {
+            200: '#f8faf9',
+            300: '#f1f5f4',
+
         }
     },
     breakpoints: {
