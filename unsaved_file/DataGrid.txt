@@ -9,21 +9,21 @@ import {
   TableContainer,
   Tbody,
   Td,
-  Text,
   Th,
   Thead,
   Tr,
+  Text,
 } from "@chakra-ui/react";
 import _ from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
-import { FaFilter } from "react-icons/fa6";
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import CategoryFilter from "./CategoryFilter";
 import DateFilter from "./DateFilter";
 import NumberFilter from "./NumberFilter";
 import SearchFilter from "./SearchFilter";
-import { FaPlus } from "react-icons/fa";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import React from "react";
+import { FaFilter } from "react-icons/fa6";
 
 interface Pagination {
   defaultPageSize: number;
@@ -34,7 +34,6 @@ interface NumberFilterInterface {
   type: "number";
   start: number;
   end: number;
-  currency?: string;
 }
 
 type TupleMember<T extends any[]> = T[number];
@@ -93,7 +92,12 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
   );
   const [lastClicked, setLastedClicked] = useState<number>();
 
+  const [cFilterShow, setCFilterShow] = useState(false);
+  const [nFilterShow, setNFilterShow] = useState(false);
+  const [dFilterShow, setDFilterShow] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const categoryFilterBtn = useRef<HTMLButtonElement>(null);
+  const categoryFilterContainer = useRef<HTMLDivElement>(null);
 
   const [isHoveringTh, setIsHoveringTh] = useState<number>(); // kvuli zobrazovani sipky na hover
 
@@ -144,24 +148,6 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
     setAscOrder(ascOrder.map((a, i) => (i === columnNumber ? (a + 1) % 3 : a)));
   };
 
-  const getTbody = (rows: T[]) => {
-    return rows.map((r) => {
-      return (
-        <Tr
-          key={r.id}
-          _hover={{
-            backgroundColor: "grey.200",
-            cursor: "pointer",
-          }}
-        >
-          {Object.values(r).map((v, i) => {
-            return <Td key={i}>{v}</Td>;
-          })}
-        </Tr>
-      );
-    });
-  };
-
   useEffect(() => {
     let rRows = _.intersection(
       filteredByMultiRange || rows,
@@ -196,6 +182,21 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
     //   }
     // }
   }, [renderedRows, pageSize, page, pagination]);
+
+  const handleHideClick = (e: MouseEvent) => {
+    if (
+      e.target !== categoryFilterContainer.current &&
+      e.target !== categoryFilterBtn.current &&
+      !categoryFilterContainer.current?.contains(e.target as Node)
+    ) {
+      setCFilterShow(false);
+    }
+  };
+  useEffect(() => {
+    window.addEventListener("click", handleHideClick);
+
+    return () => window.removeEventListener("click", handleHideClick);
+  });
 
   return (
     <Container
@@ -238,25 +239,100 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
           </Flex>
         </Flex>
 
-        <Flex
-          display={showFilters && filters ? "flex" : "none"}
-          alignItems={"center"}
-          justifyContent={"space-around"}
-          padding={"30px"}
-          backgroundColor={"grey.200"}
-          mb={3}
-        >
-          {filters ? (
-            <>
-              {/* typy filtru zatim - date, range number, category */}
-              {category
-                ? category.map((c) => {
-                    return <Button>{c.dataKey as string}</Button>; // prekladat dataKey pomoci translate
-                  })
-                : null}
-            </>
-          ) : null}
-        </Flex>
+          <Flex display={showFilters && filters ? "flex" : "none"} padding={"30px"} backgroundColor={"grey.200"} mb={3}>
+            {filters?.map((f, i) => {
+              if (f.props.type === "number")
+                return (
+                  <React.Fragment key={i}>
+                    <Button
+                      maxWidth={"fit-content"}
+                      onClick={() => setNFilterShow(!nFilterShow)}
+                    >
+                      {f.name}
+                    </Button>
+                    <Container
+                      maxWidth={"fit-content"}
+                      borderColor={"grey.200"}
+                      boxShadow={"1px"}
+                      borderWidth={"1px"}
+                      borderRadius={"10px"}
+                      display={nFilterShow ? "block" : "none"}
+                      key={i}
+                    >
+                      <NumberFilter<T>
+                        key={i}
+                        onChange={setFilteredByMultiRange}
+                        start={f.props.start}
+                        end={f.props.end}
+                        data={rows}
+                        dataKey={f.dataKey}
+                      />
+                    </Container>
+                  </React.Fragment>
+                );
+              else if (f.props.type === "date") {
+                return (
+                  <div key={i}>
+                    <span>{f.name}</span>
+                    <DateFilter<T>
+                      data={rows}
+                      dataKey={f.dataKey}
+                      onChange={setFilteredByDate}
+                      key={i}
+                    />
+                  </div>
+                );
+              }
+              if (f.props.type === "category")
+                return (
+                  <React.Fragment key={i}>
+                    <Button
+                      id="categoryButton"
+                      maxWidth={"fit-content"}
+                      onClick={() => setCFilterShow(!cFilterShow)}
+                      ref={categoryFilterBtn}
+                    >
+                      {f.name}
+                    </Button>
+                    <div
+                      style={
+                        cFilterShow
+                          ? { position: "relative" }
+                          : { display: "none" }
+                      }
+                    >
+                      <Container
+                        ref={categoryFilterContainer}
+                        id="containerCategory"
+                        maxWidth={"fit-content"}
+                        borderColor={"black"}
+                        boxShadow={"1px"}
+                        borderWidth={"1px"}
+                        borderRadius={"10px"}
+                        position={"absolute"}
+                        minW={"170px"}
+                        top={"47px"}
+                        right={"0"}
+                        backgroundColor={"white"}
+                        padding={"18px"}
+                        zIndex={1}
+                      >
+                        <CategoryFilter<T, typeof f.props.categoryEnum>
+                          onChange={setFilteredByCategory}
+                          categories={f.props.categoryEnum}
+                          dataKey={f.dataKey}
+                          name={f.name}
+                          data={rows}
+                          setCategory={setCategory}
+                          category={category}
+                        />
+                      </Container>
+                    </div>
+                  </React.Fragment>
+                );
+              else return null;
+            })}
+          </Flex>
         {renderedRows ? (
           renderedRows.length > 0 ? (
             <TableContainer>
@@ -304,13 +380,32 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
                 </Thead>
                 <Tbody>
                   {pagination && pageSize
-                    ? getTbody(
-                        renderedRows.slice(
-                          (page - 1) * pageSize,
-                          page * pageSize
-                        )
-                      )
-                    : getTbody(renderedRows)}
+                    ? renderedRows
+                        .slice((page - 1) * pageSize, page * pageSize)
+                        .map((r, i) => {
+                          return (
+                            <Tr
+                              key={r.id}
+                              _hover={{
+                                backgroundColor: "grey.200",
+                                cursor: "pointer",
+                              }}
+                            >
+                              {Object.values(r).map((v, i) => {
+                                return <Td key={i}>{v}</Td>;
+                              })}
+                            </Tr>
+                          );
+                        })
+                    : renderedRows.map((r, i) => {
+                        return (
+                          <Tr key={r.id} _hover={{ backgroundColor: "grey" }}>
+                            {Object.values(r).map((v, i) => {
+                              return <Td key={i}>{v}</Td>;
+                            })}
+                          </Tr>
+                        );
+                      })}
                 </Tbody>
               </Table>
             </TableContainer>
@@ -358,69 +453,3 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
 }
 
 export default DataGrid;
-
-/*
-{filters?.map((f, i) => {
-              if (f.props.type === "number")
-                return (
-                    <Container
-                      borderColor={"grey.200"}
-                      boxShadow={"1px"}
-                      borderWidth={"1px"}
-                      borderRadius={"10px"}
-                      key={i}
-                      maxW={'300px'}
-                      margin={0}
-                    >
-                      <Text fontWeight={'bold'}>{f.name}</Text>
-                      <NumberFilter<T>
-                        key={i}
-                        onChange={setFilteredByMultiRange}
-                        start={f.props.start}
-                        end={f.props.end}
-                        data={rows}
-                        dataKey={f.dataKey}
-                        currency={f.props.currency}
-                      />
-                    </Container>
-                );
-              else if (f.props.type === "date") {
-                return (
-                  <div key={i}>
-                    <span>{f.name}</span>
-                    <DateFilter<T>
-                      data={rows}
-                      dataKey={f.dataKey}
-                      onChange={setFilteredByDate}
-                    />
-                  </div>
-                );
-              }
-              if (f.props.type === "category")
-                return (
-                      <Container
-                        id="containerCategory"
-                        maxWidth={"fit-content"}
-                        borderColor={"black"}
-                        boxShadow={"1px"}
-                        borderWidth={"1px"}
-                        borderRadius={"10px"}
-                        backgroundColor={"white"}
-                        padding={"18px"}
-                        zIndex={1}
-                        key={i}
-                      >
-                        <CategoryFilter<T, typeof f.props.categoryEnum>
-                          onChange={setFilteredByCategory}
-                          categories={f.props.categoryEnum}
-                          dataKey={f.dataKey}
-                          name={f.name}
-                          data={rows}
-                          setCategory={setCategory}
-                          category={category}
-                        />
-                      </Container>
-                );
-              else return null;
-            })}
-*/
