@@ -13,9 +13,7 @@ const AccountPage = () => {
   const toast = useToast();
   const { mutate } = useLogout(() => {
     // callback
-    
     navigate("/"); 
-    console.log('ef');
 
     toast({
       status: "success",
