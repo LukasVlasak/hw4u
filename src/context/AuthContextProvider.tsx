@@ -1,8 +1,6 @@
 import { ReactNode, useEffect, useReducer } from "react"
 import authContext from "./AuthContext";
 import AuthReducer from "../reducers/AuthReducer";
-import { useQueryClient } from "@tanstack/react-query";
-import { User } from "../services/userService";
 import useAuth from "../hooks/useAuth";
 
 interface Props {
@@ -13,7 +11,7 @@ const AuthContextProvider = ({children}: Props) => {
 
     const { data } = useAuth();
       
-    const [value, dispatch] = useReducer(AuthReducer, {} as User);
+    const [value, dispatch] = useReducer(AuthReducer, null);
 
     useEffect(() => {
       if (data) {

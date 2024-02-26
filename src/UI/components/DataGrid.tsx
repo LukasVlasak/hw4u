@@ -1,6 +1,7 @@
 // date filter nefungujeu vice filtru, protoze jednim statem ovladam vsechny filtry - muselo by byt reseno stejne
 // jako to je u category - globalni state v taskslistu, ktery si predavam jako prop do categoryFilter.tsx
-
+// az budu rozchazet filtrovani tak porovnavat objekty line 210;
+// type Partial<T> = { [P in keyof T]?: T[P] | undefined; } - zajimava implementace - mozna by vyresila zapaseni s TuppleMember
 import {
   Button,
   Container,
@@ -26,6 +27,7 @@ import SearchFilter from "./SearchFilter";
 import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import authContext from "../../context/AuthContext";
+import LoadingComponents from "./LoadingComponents";
 
 interface Pagination {
   defaultPageSize: number;
@@ -69,8 +71,14 @@ interface Props<T, K extends any[]> {
   search?: (keyof T)[];
   filters?: Filters<T, K>[];
   pagination?: Pagination;
+  showId?: boolean;
 }
 
+/**
+ * columns se pocitaji bez id => columns.lenght se musi rovnat Object.values(rows[0].lenght) - 1
+ * @param param0
+ * @returns
+ */
 function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
   onRowClick,
   columns,
@@ -79,25 +87,33 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
   filters,
   search,
   pagination,
+  showId,
 }: Props<T, K>) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(
     pagination && pagination.defaultPageSize
   );
+
+  // radky, ktere se vykresluji
   const [renderedRows, setRenderedRows] = useState(rows);
+
+  // filtrovani - nedodelano
   const [filteredByMultiRange, setFilteredByMultiRange] = useState<T[]>();
   const [filteredByCategory, setFilteredByCategory] = useState<T[]>();
-  const [filteredBySearch, setFilteredBySearch] = useState<T[]>();
   const [filteredByDate, setFilteredByDate] = useState<T[]>();
   const [category, setCategory] =
     useState<{ category: string; dataKey: keyof T }[]>();
+  const [showFilters, setShowFilters] = useState(false);
 
+  // searching
+  const [filteredBySearch, setFilteredBySearch] = useState<T[]>();
+
+  // sorting
   const [ascOrder, setAscOrder] = useState<number[]>(
     Array(columns.length).fill(0)
   );
+  // kdyz se pole zfiltruje a zaroven ma byt serazeno - tak abych vedel jaky sloupec seradit
   const [lastClicked, setLastedClicked] = useState<number>();
-
-  const [showFilters, setShowFilters] = useState(false);
 
   const [isHoveringTh, setIsHoveringTh] = useState<number>(); // kvuli zobrazovani sipky na hover
 
@@ -160,8 +176,15 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
           }}
           onClick={onRowClick ? () => onRowClick(r.id) : undefined}
         >
-          {Object.values(r).map((v, i) => {
-            return <Td key={i}>{v}</Td>;
+          {Object.entries(r).map(([key, value], i) => {
+            if (showId) {
+              return <Td key={i}>{value}</Td>;
+            } else {
+              if (key !== "id") {
+                return <Td key={i}>{value}</Td>;
+              }
+              return null;
+            }
           })}
         </Tr>
       );
@@ -169,6 +192,7 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
   };
 
   useEffect(() => {
+    // filtrovani - zfiltrovat podle vsech aktivnich filtru
     let rRows = _.intersection(
       filteredByMultiRange || rows,
       filteredByCategory || rows,
@@ -176,11 +200,14 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
       filteredByDate || rows
     );
 
+    // sortovani po filtrovani
     if (lastClicked) {
       rRows = sortFn(lastClicked, rRows, ascOrder[lastClicked]);
     }
 
+    // zbytecny rerender
     setRenderedRows(rRows);
+    // chci aby se toto vykonalo pouze po filtrovani
     // eslint-disable-next-line
   }, [
     filteredByMultiRange,
@@ -190,16 +217,31 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
     filteredByDate,
   ]);
 
+  // pokud je nastavena pagination napr na 5 na stranku - uzivatel dojede na tu posledni a nastavi na 20 na stranku - osetreni aby se nestavali chyby
   useEffect(() => {
     if (pagination && pageSize) {
       const totalRows = renderedRows.length;
       const totalPages = Math.ceil(totalRows / pageSize);
-
+      
       if (page > totalPages) {
-        setPage(totalPages);
+        if (totalPages === 0) {
+          setPage(1);
+        }else {
+          setPage(totalPages);
+        }
       }
     }
   }, [renderedRows, pageSize, page, pagination]);
+
+  // check if columns lenght is same as rows lenght
+  useEffect(() => {
+    if (columns !== "keyof T") {
+      if (Object.keys(rows[0]).length - 1 !== columns.length) {
+        throw Error("columns lenght does not match rows lenght");
+      }
+    }
+    // nemelo by se menit => just on mount
+  }, [columns, rows]);
 
   return (
     <Container
@@ -271,7 +313,6 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
                 >
                   {/* zde bcs u th to nefunguje */}
                   <Tr>
-                    {/* <div onMouseEnter={(e) => console.log(e.target)}> */}
                     {rendrededColumns.map((c, i) => {
                       return (
                         <Th onClick={() => handleSortClick(i)} key={i}>
@@ -303,7 +344,6 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
                         </Th>
                       );
                     })}
-                    {/* </div> */}
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -321,7 +361,7 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
           ) : (
             <Container minW={"100%"}>Nothing to show</Container>
           )
-        ) : null}
+        ) : <LoadingComponents />}
         {/* pagination */}
         {pagination && pageSize ? (
           <Flex flexDir={"row"} justifyContent={"space-between"}>
@@ -338,17 +378,26 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
               })}
             </select>
             <Flex>
-              <span>
-                {(page - 1) * pageSize + 1} -{" "}
-                {page * pageSize > renderedRows.length
-                  ? renderedRows.length
-                  : page * pageSize}
-              </span>
+              <Flex alignItems={'center'} mr={2}>
+                {renderedRows.length === 0 ? (
+                  "-"
+                ) : (
+                  <span>
+                    {(page - 1) * pageSize + 1} -{" "}
+                    {page * pageSize > renderedRows.length
+                      ? renderedRows.length
+                      : page * pageSize}
+                  </span>
+                )}
+              </Flex>
               <Button isDisabled={page <= 1} onClick={() => setPage(page - 1)}>
                 <IoIosArrowBack />
               </Button>
               <Button
-                isDisabled={page * pageSize - 1 >= renderedRows.length}
+                isDisabled={
+                  page * pageSize - 1 >= renderedRows.length ||
+                  renderedRows.length === 0
+                }
                 onClick={() => setPage(page + 1)}
               >
                 <IoIosArrowForward />

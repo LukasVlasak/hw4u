@@ -10,6 +10,7 @@ export interface Task {
     description: string;
     for_user_id?: number;
     created_date?: Date;
+    category_second?: string;
 }
 
 export interface LoaderDataTaskInterface {
