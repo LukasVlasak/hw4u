@@ -25,7 +25,6 @@ const OneTaskPage = () => {
   // console.log(appUserQueryObj);
   
   
-
   return (
     <Flex flexDir={'row'} justifyContent={'space-between'}>
        <Container>

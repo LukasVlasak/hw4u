@@ -111,7 +111,7 @@ const ServerSideFiltering = () => {
         {hasNextPage && isFetchingNextPage ? "Loading" : ""}
       </span>
     </TableContainer>
-  ) : null;
+  ) : <LoadingComponents />;
 };
 
 export default ServerSideFiltering;

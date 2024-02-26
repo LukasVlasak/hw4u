@@ -12,9 +12,13 @@ function SearchFilter<T>({ onSearch, searchInValues, data }: Props<T>) {
     return data.filter((d) => {
       return searchInValues.some((s) => {
         const item: string = d[s] as string;
-        return (
-          item.toString().toLowerCase().indexOf(searchedWord.toLowerCase()) > -1
-        );
+        if (item) {
+          return (
+            item.toString().toLowerCase().indexOf(searchedWord.toLowerCase()) > -1
+          );
+        }else {
+          return false;
+        }
       });
     });
   };

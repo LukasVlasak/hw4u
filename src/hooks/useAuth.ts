@@ -48,6 +48,8 @@ export const useLogin = (callback?: () => void) => {
   })
 }
 
+
+// vymazani cookies na serveru
 export const useLogout = (callback?: () => void) => {
   const queryClient = useQueryClient();
   const { dispatch } = useContext(authContext);
