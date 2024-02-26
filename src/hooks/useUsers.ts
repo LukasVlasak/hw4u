@@ -1,7 +1,17 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import userService, { User } from "../services/userService";
 import { AxiosError, AxiosResponse } from "axios";
 import { ErrorCode } from "../services/api-client";
+
+
+export const useGetOneUser = (id?: number) => {
+  return useQuery({
+    queryKey: id ? ['users/' + id] : [''],
+    queryFn: () => userService.get(id),
+    throwOnError: true,
+  });
+}
+
 
 const useRegister = (callback?: () => void) => {
   const queryClient = useQueryClient();

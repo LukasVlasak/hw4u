@@ -1,19 +1,17 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import RegisterForm from "../components/RegisterForm"
 import { useNavigate } from "react-router-dom";
-import useAuth from "../../hooks/useAuth";
+import authContext from "../../context/AuthContext";
 
 const SignUpPage = () => {
 
-  const { isError, isFetching } = useAuth();
+  const { value } = useContext(authContext);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isFetching) {
-      if (!isError) return navigate("/account")
-    }
-  }, [navigate, isFetching, isError]);
-  
+    if (value) navigate("/account");
+  }, [navigate, value]);
+
   return (
     <RegisterForm />
   )

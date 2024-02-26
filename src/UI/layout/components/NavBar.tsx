@@ -2,49 +2,51 @@
 
 import {
   Box,
-  Flex,
-  Text,
-  IconButton,
   Button,
-  Stack,
   Collapse,
+  Flex,
   Icon,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  useDisclosure,
+  IconButton,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Stack,
+  Text,
+  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { FaRegUser } from "react-icons/fa";
-import { FaChevronRight } from "react-icons/fa";
-import { HiMiniChevronDown } from "react-icons/hi2";
-import { GiHamburgerMenu } from "react-icons/gi";
-import { IoMdClose } from "react-icons/io";
+import { useContext } from "react";
 import Headroom from "react-headroom";
-import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import useAuth, { useLogout } from "../../../hooks/useAuth";
+import { FaChevronRight, FaRegUser } from "react-icons/fa";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { HiMiniChevronDown } from "react-icons/hi2";
+import { IoMdClose } from "react-icons/io";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import authContext from "../../../context/AuthContext";
+import { useLogout } from "../../../hooks/useAuth";
 
 export default function NavBar() {
   const { isOpen, onToggle } = useDisclosure();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { isError, isFetching } = useAuth();
   const toast = useToast();
+  const { value } = useContext(authContext);
+  
   const { mutate } = useLogout(() => {
     // callback
-    navigate("/");
+    navigate("/"); 
     toast({
-      status: 'success',
+      status: "success",
       duration: 5000,
       isClosable: true,
       title: t("auth.successSignOut"),
-      description: t("auth.successSignOutDesc")
-    })
+      description: t("auth.successSignOutDesc"),
+    });
   });
 
   const handleSignOut = () => {
@@ -108,74 +110,81 @@ export default function NavBar() {
             </Flex>
           </Flex>
 
-          {!isFetching ? (
-            isError ? (
-              <Stack
-                flex={{ base: 1, md: 0 }}
-                justify={"flex-end"}
-                direction={"row"}
-                spacing={6}
-                alignItems={"center"}
+          {!value ? (
+            <Stack
+              flex={{ base: 1, md: 0 }}
+              justify={"flex-end"}
+              direction={"row"}
+              spacing={6}
+              alignItems={"center"}
+            >
+              <Button
+                fontSize={"md"}
+                fontWeight={400}
+                variant={"link"}
+                color={"grey.200"}
               >
-                <Button
-                  fontSize={"md"}
-                  fontWeight={400}
-                  variant={"link"}
-                  color={"grey.200"}
-                >
-                  <Link to={"/login"}>{t("auth.signIn")}</Link>
-                </Button>
-                <Button
-                  display={{
-                    hideSignUp: "inline-flex",
-                    md: "none",
-                    base: "none",
-                  }}
-                  fontSize={"md"}
-                  fontWeight={600}
-                  color={"white"}
-                  bg={"transparent"}
-                  onClick={() => navigate("/register")}
-                  border={"2px solid white"}
-                  _hover={{ color: "brand.hoverBlueColor" }}
-                  _focus={{ bg: "transparent" }}
-                >
-                  <Link to={"/register"}>{t("auth.signUp")}</Link>
-                </Button>
-              </Stack>
-            ) : (
-              <Menu>
-                <MenuButton
-                  aria-label="User account options"
-                  /* _expanded={} */ _active={{
-                    color: "white",
-                    backgroundColor: "transparent",
-                  }}
-                  _hover={{ backgroundColor: "transparent" }}
-                  backgroundColor={"transparent"}
-                  color={"white"}
-                  as={IconButton}
-                  icon={<FaRegUser />}
-                >
-                  Actions
-                </MenuButton>
-                <MenuList color={"black"}>
-                  <Link role="group" to={"/account"}>
-                    <MenuItem _groupHover={{color: "brand.hoverBlueColor"}}>{t("account.account")}</MenuItem>
-                  </Link>
-                  <Link role="group" to={"/ask"}>
-                    <MenuItem _groupHover={{color: "brand.hoverBlueColor"}}>{t("tasks.askAQuestion")}</MenuItem>
-                  </Link>
-                  <Link role="group" to={"/subscripe"}>
-                    <MenuItem _groupHover={{color: "brand.hoverBlueColor"}}>{t("subscripe.subscripe")}</MenuItem>
-                  </Link>
-                  <MenuItem _hover={{color: "brand.hoverBlueColor"}} onClick={handleSignOut}>
-                    {t("auth.signOut")}
+                <Link to={"/login"}>{t("auth.signIn")}</Link>
+              </Button>
+              <Button
+                display={{
+                  hideSignUp: "inline-flex",
+                  md: "none",
+                  base: "none",
+                }}
+                fontSize={"md"}
+                fontWeight={600}
+                color={"white"}
+                bg={"transparent"}
+                onClick={() => navigate("/register")}
+                border={"2px solid white"}
+                _hover={{ color: "brand.hoverBlueColor" }}
+                _focus={{ bg: "transparent" }}
+              >
+                <Link to={"/register"}>{t("auth.signUp")}</Link>
+              </Button>
+            </Stack>
+          ) : (
+            <Menu>
+              <MenuButton
+                aria-label="User account options"
+                /* _expanded={} */ _active={{
+                  color: "white",
+                  backgroundColor: "transparent",
+                }}
+                _hover={{ backgroundColor: "transparent" }}
+                backgroundColor={"transparent"}
+                color={"white"}
+                as={IconButton}
+                icon={<FaRegUser />}
+              >
+                Actions
+              </MenuButton>
+              <MenuList color={"black"}>
+                <Link role="group" to={"/account"}>
+                  <MenuItem _groupHover={{ color: "brand.hoverBlueColor" }}>
+                    {t("account.account")}
                   </MenuItem>
-                </MenuList>
-              </Menu>
-            )
-          ) : null}
+                </Link>
+                <Link role="group" to={"/ask"}>
+                  <MenuItem _groupHover={{ color: "brand.hoverBlueColor" }}>
+                    {t("tasks.askAQuestion")}
+                  </MenuItem>
+                </Link>
+                <Link role="group" to={"/subscripe"}>
+                  <MenuItem _groupHover={{ color: "brand.hoverBlueColor" }}>
+                    {t("subscripe.subscripe")}
+                  </MenuItem>
+                </Link>
+                <MenuItem
+                  _hover={{ color: "brand.hoverBlueColor" }}
+                  onClick={handleSignOut}
+                >
+                  {t("auth.signOut")}
+                </MenuItem>
+              </MenuList>
+            </Menu>
+          )}
         </Flex>
 
         <Collapse in={isOpen} animateOpacity>
@@ -342,12 +351,16 @@ const MobileNavItem = ({ label, children, href, index }: NavItem) => {
         >
           {children &&
             children.map((child) => (
-              <Link style={{width: "100%"}} key={child.label} to={child.href ?? "#"}>
+              <Link
+                style={{ width: "100%" }}
+                key={child.label}
+                to={child.href ?? "#"}
+              >
                 <Box
                   _hover={{ color: "brand.hoverBlueColor", cursor: "pointer" }}
                   key={child.label}
                   py={2}
-                  width={'100%'}
+                  width={"100%"}
                 >
                   {child.label}{" "}
                 </Box>

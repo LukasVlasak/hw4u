@@ -12,6 +12,10 @@ export interface Task {
     created_date?: Date;
 }
 
+export interface LoaderDataTaskInterface {
+    data: Task[];
+}
+
 export const TaskCategoryObj = {
     quality: "Quality",
     marketing: "Marketing",

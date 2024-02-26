@@ -1,19 +1,17 @@
-import { useEffect } from "react";
-import useAuth from "../../hooks/useAuth"
+import { useContext, useEffect } from "react";
 import LoginForm from "../components/LoginForm"
 import { useNavigate } from "react-router-dom";
+import authContext from "../../context/AuthContext";
 
 const SignInPage = () => {
 
-  const { isError, isFetching } = useAuth();
+  const { value } = useContext(authContext);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isFetching) {
-      if (!isError) return navigate("/account")
-    }
-  }, [navigate, isFetching, isError]);
   
+  useEffect(() => {
+    if (value) navigate("/account");
+  }, [navigate, value]);
+
   return (
     <LoginForm />
   )

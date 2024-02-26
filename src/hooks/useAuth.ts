@@ -3,12 +3,14 @@ import authService from "../services/authService";
 import { AxiosError, AxiosResponse } from "axios";
 import { User } from "../services/userService";
 import APIClient, { ErrorCode } from "../services/api-client";
+import { useContext } from "react";
+import authContext from "../context/AuthContext";
 
-const useAuth = () => {  
+const useAuth = () => {
     return useQuery<User[], AxiosError, User[]>({
       queryKey: ['auth'],
       queryFn: () => authService.getAll(),
-      throwOnError: (error, query) => {        
+      throwOnError: (error, query) => {
         if (error.response?.status === 400) return false;
         else return true;
       },
@@ -20,6 +22,7 @@ const useAuth = () => {
 export const useLogin = (callback?: () => void) => {
 
   const queryClient = useQueryClient();
+  const { dispatch } = useContext(authContext);
 
   return useMutation<AxiosResponse<User>, AxiosError<ErrorCode>, User>({
     mutationFn: (data: User) => authService.post(data),
@@ -31,6 +34,8 @@ export const useLogin = (callback?: () => void) => {
       queryClient.invalidateQueries({
         queryKey: ['auth'],
       });
+
+      dispatch({type: "LOGIN", payload: {user: fromServer.data}})
 
       if (callback) {
         callback();
@@ -45,6 +50,7 @@ export const useLogin = (callback?: () => void) => {
 
 export const useLogout = (callback?: () => void) => {
   const queryClient = useQueryClient();
+  const { dispatch } = useContext(authContext);
 
   return useMutation({
     mutationFn: () => {
@@ -57,6 +63,8 @@ export const useLogout = (callback?: () => void) => {
       queryClient.invalidateQueries({
         queryKey: ['auth'],
       });
+
+      dispatch({type: "LOGOUT"});
 
       if (callback) {
         callback();

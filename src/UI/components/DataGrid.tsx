@@ -15,7 +15,7 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import _ from "lodash";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { FaFilter } from "react-icons/fa6";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
@@ -24,6 +24,8 @@ import DateFilter from "./DateFilter";
 import NumberFilter from "./NumberFilter";
 import SearchFilter from "./SearchFilter";
 import { FaPlus } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import authContext from "../../context/AuthContext";
 
 interface Pagination {
   defaultPageSize: number;
@@ -60,6 +62,7 @@ interface Filters<T, K extends any[]> {
 }
 
 interface Props<T, K extends any[]> {
+  onRowClick?: (id: number) => void;
   columns: string[] | "keyof T";
   rows: T[];
   sort?: boolean;
@@ -69,6 +72,7 @@ interface Props<T, K extends any[]> {
 }
 
 function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
+  onRowClick,
   columns,
   rows,
   sort,
@@ -99,6 +103,7 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
 
   const rendrededColumns =
     columns === "keyof T" ? Object.keys(rows[0]) : columns;
+
   /**
    *
    * @param columnNumber cislo sloupce, ktery je sortovan
@@ -153,6 +158,7 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
             backgroundColor: "grey.200",
             cursor: "pointer",
           }}
+          onClick={onRowClick ? () => onRowClick(r.id) : undefined}
         >
           {Object.values(r).map((v, i) => {
             return <Td key={i}>{v}</Td>;
@@ -185,16 +191,14 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
   ]);
 
   useEffect(() => {
-    console.log(pageSize);
+    if (pagination && pageSize) {
+      const totalRows = renderedRows.length;
+      const totalPages = Math.ceil(totalRows / pageSize);
 
-    // if (pagination && pageSize) {
-    //   const totalRows = renderedRows.length;
-    //   const totalPages = Math.ceil(totalRows / pageSize);
-
-    //   if (page > totalPages) {
-    //     setPage(totalPages);
-    //   }
-    // }
+      if (page > totalPages) {
+        setPage(totalPages);
+      }
+    }
   }, [renderedRows, pageSize, page, pagination]);
 
   return (
