@@ -44,7 +44,7 @@ const footerData = [
 
 const Footer = () => {
   return (
-    <Container borderTopWidth={'1px'} borderTopColor={'grey.200'} maxW="7xl" p={{ base: 5, md: 10 }}>
+    <Container minWidth={'100%'} borderTopWidth={'1px'} bg={'#edf2f6'} p={{ base: 5, md: 10 }}>
       <VStack spacing={5} alignItems="initial">
         <Flex
           flexWrap="wrap"
@@ -81,7 +81,7 @@ const Footer = () => {
         </Flex>
         <Flex alignItems="center">
           <Text color="gray.500" fontSize="0.875rem" pl="0.5rem">
-            &copy; 2024 Lukáš Vlasák, All rights reserved. Icons by <a rel="noreferrer" style={{textDecoration: 'underline'}} target='_blank' href='https://icons8.com/'>Icons8</a>
+            &copy; 2025 Lukáš Vlasák, Zápočtový projekt. Icons by <a rel="noreferrer" style={{textDecoration: 'underline'}} target='_blank' href='https://icons8.com/'>Icons8</a>
           </Text>
         </Flex>
       </VStack>

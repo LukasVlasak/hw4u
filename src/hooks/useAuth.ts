@@ -62,8 +62,8 @@ export const useLogout = (callback?: () => void) => {
       localStorage.removeItem("x-auth-token");
       setTimeout(() => {}, 50); // aby localstorage stihlo odstranit a neblblo to
 
-      queryClient.invalidateQueries({
-        queryKey: ['auth'],
+      queryClient.resetQueries({
+        queryKey: ["auth"],
       });
 
       dispatch({type: "LOGOUT"});

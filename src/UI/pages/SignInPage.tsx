@@ -1,20 +1,26 @@
 import { useContext, useEffect } from "react";
-import LoginForm from "../components/LoginForm"
-import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import authContext from "../../context/AuthContext";
+import useNavigateWithToast from "../../hooks/useNavigateWithToast";
+import LoginForm from "../components/LoginForm";
 
 const SignInPage = () => {
-
   const { value } = useContext(authContext);
-  const navigate = useNavigate();
-  
+  const navigateWithToast = useNavigateWithToast();
+  const { t } = useTranslation();
+
   useEffect(() => {
-    if (value) navigate("/account");
-  }, [navigate, value]);
+    if (value)
+      navigateWithToast("/account", {
+        status: "info",
+        duration: 4000,
+        isClosable: true,
+        title: t("auth.redirection"),
+        description: t("auth.alreadySignIn"),
+      });
+  }, [navigateWithToast, value, t]);
 
-  return (
-    <LoginForm />
-  )
-}
+  return <LoginForm />;
+};
 
-export default SignInPage
+export default SignInPage;

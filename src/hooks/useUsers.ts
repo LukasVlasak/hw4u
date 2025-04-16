@@ -12,6 +12,31 @@ export const useGetOneUser = (id?: number) => {
   });
 }
 
+export const useEditAccount = (callback?: () => void) => {
+  const queryClient = useQueryClient();
+
+  return useMutation<AxiosResponse<User>, AxiosError<ErrorCode>, User>({
+    mutationFn: (data: User) => userService.putCurrentUser(data),
+    onSuccess: (response, userPassedToFunction) => {
+
+      // invalid query
+      queryClient.invalidateQueries({
+        queryKey: ["users"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["auth"],
+      });
+      
+      if (callback) {
+        callback();
+      }
+    },
+    throwOnError(error) {
+      if (error.response?.status === 400) return false;
+      else return true;
+    },
+  });
+}
 
 const useRegister = (callback?: () => void) => {
   const queryClient = useQueryClient();

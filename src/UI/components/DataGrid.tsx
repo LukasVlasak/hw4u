@@ -6,6 +6,7 @@ import {
   Button,
   Container,
   Flex,
+  IconButton,
   Table,
   TableContainer,
   Tbody,
@@ -15,8 +16,9 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
+import { MdEdit, MdDelete } from "react-icons/md";
 import _ from "lodash";
-import { useContext, useEffect, useState } from "react";
+import { MouseEvent, useContext, useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { FaFilter } from "react-icons/fa6";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
@@ -28,6 +30,7 @@ import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import authContext from "../../context/AuthContext";
 import LoadingComponents from "./LoadingComponents";
+import formatDateToDDMMYYYY from "../../utils/fc";
 
 interface Pagination {
   defaultPageSize: number;
@@ -72,6 +75,8 @@ interface Props<T, K extends any[]> {
   filters?: Filters<T, K>[];
   pagination?: Pagination;
   showId?: boolean;
+  onDelete?: (rowId: number, e: MouseEvent<HTMLButtonElement>) => void;
+  onEdit?: (rowId: number, e: MouseEvent<HTMLButtonElement>) => void;
 }
 
 /**
@@ -88,6 +93,8 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
   search,
   pagination,
   showId,
+  onDelete,
+  onEdit
 }: Props<T, K>) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(
@@ -97,6 +104,11 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
   // radky, ktere se vykresluji
   const [renderedRows, setRenderedRows] = useState(rows);
 
+    useEffect(() => {
+      //console.log('rerender');
+      
+    })
+  
   // filtrovani - nedodelano
   const [filteredByMultiRange, setFilteredByMultiRange] = useState<T[]>();
   const [filteredByCategory, setFilteredByCategory] = useState<T[]>();
@@ -104,7 +116,7 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
   const [category, setCategory] =
     useState<{ category: string; dataKey: keyof T }[]>();
   const [showFilters, setShowFilters] = useState(false);
-
+    
   // searching
   const [filteredBySearch, setFilteredBySearch] = useState<T[]>();
 
@@ -166,7 +178,7 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
   };
 
   const getTbody = (rows: T[]) => {
-    return rows.map((r) => {
+    return rows.map((r, i) => {
       return (
         <Tr
           key={r.id}
@@ -178,14 +190,16 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
         >
           {Object.entries(r).map(([key, value], i) => {
             if (showId) {
-              return <Td key={i}>{value}</Td>;
+              return <Td key={i}>{value || '-'}</Td>;
             } else {
               if (key !== "id") {
-                return <Td key={i}>{value}</Td>;
+                return <Td key={i}>{value || '-'}</Td>;
               }
               return null;
             }
           })}
+          {onEdit ? <Td><Flex justifyContent={'center'}><IconButton onClick={(e) => onEdit(r.id, e)} aria-label='Edit row' colorScheme="blue" icon={<MdEdit />} /></Flex></Td> : null}
+          {onDelete ? <Td><Flex justifyContent={'center'}><IconButton onClick={(e) => onDelete(r.id, e)} aria-label='Delete row' colorScheme="red" icon={<MdDelete />} /></Flex></Td> : null}
         </Tr>
       );
     });
@@ -236,8 +250,10 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
   // check if columns lenght is same as rows lenght
   useEffect(() => {
     if (columns !== "keyof T") {
-      if (Object.keys(rows[0]).length - 1 !== columns.length) {
-        throw Error("columns lenght does not match rows lenght");
+      if (rows.length > 0) {
+        if (Object.keys(rows[0]).length - 1 !== columns.length) {
+          throw Error("columns lenght does not match rows lenght");
+        }
       }
     }
     // nemelo by se menit => just on mount
@@ -296,7 +312,7 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
             <>
               {/* typy filtru zatim - date, range number, category */}
               {category
-                ? category.map((c) => {
+                ? category.map((c) => {                  
                     return <Button>{c.dataKey as string}</Button>; // prekladat dataKey pomoci translate
                   })
                 : null}
@@ -323,8 +339,9 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
                             alignItems={"center"}
                           >
                             <Text
-                              minWidth={"calc(fit-content + 25px)"}
+                              minWidth={"calc(fit-content+25px)"}
                               marginRight={"3px"}
+                              marginBottom={0}
                             >
                               {c}
                             </Text>
@@ -344,6 +361,8 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
                         </Th>
                       );
                     })}
+                    {onEdit ? <Th>Editace</Th> : null}
+                    {onDelete ? <Th>Mazani</Th> : null}
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -382,12 +401,17 @@ function DataGrid<T extends { id: number }, K extends any[] = undefined[]>({
                 {renderedRows.length === 0 ? (
                   "-"
                 ) : (
+                  <>
+                  <span>
+                    total rows: {renderedRows.length}
+                  </span>
                   <span>
                     {(page - 1) * pageSize + 1} -{" "}
                     {page * pageSize > renderedRows.length
                       ? renderedRows.length
                       : page * pageSize}
                   </span>
+                  </>
                 )}
               </Flex>
               <Button isDisabled={page <= 1} onClick={() => setPage(page - 1)}>

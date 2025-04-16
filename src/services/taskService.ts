@@ -1,4 +1,5 @@
 import APIClient from "./api-client";
+import { User } from "./userService";
 
 export interface Task {
     id: number;
@@ -8,9 +9,8 @@ export interface Task {
     due_date?: Date;
     user_id: number;
     description: string;
-    for_user_id?: number;
     created_date?: Date;
-    category_second?: string;
+    for_user: Partial<User>[];
 }
 
 export interface LoaderDataTaskInterface {
@@ -18,10 +18,9 @@ export interface LoaderDataTaskInterface {
 }
 
 export const TaskCategoryObj = {
-    quality: "Quality",
+    programming: "Programming",
     marketing: "Marketing",
     development: "Development",
-    neco: "Neco"
 }
 
 export const TaskCategoryObj2 = {

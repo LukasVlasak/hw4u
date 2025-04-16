@@ -8,8 +8,7 @@ import {
   Input,
   ListItem,
   Text,
-  UnorderedList,
-  useToast,
+  UnorderedList
 } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import { joiResolver } from "@hookform/resolvers/joi";
@@ -17,7 +16,8 @@ import Joi from "joi";
 import { useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import useNavigateWithToast from "../../hooks/useNavigateWithToast";
 import useRegister from "../../hooks/useUsers";
 import { User } from "../../services/userService";
 
@@ -91,17 +91,15 @@ const RegisterForm = () => {
     handleSubmit,
     formState: { errors, isSubmitted },
   } = useForm<FormData>({ resolver: joiResolver(schema) });
-  const navigate = useNavigate();
-  const toast = useToast();
+  const navigateWithToast = useNavigateWithToast();
   const { mutate, error } = useRegister(() => {
-    navigate("/");
-    toast({
+    navigateWithToast("/", {
       title: t("auth.accountCreated"),
       description: t("auth.yourAccountWasCreated"),
       duration: 5000,
       isClosable: true,
-      status: 'success'
-    })
+      status: "success",
+    });
   });
   const [passwordVal, setPasswordVal] = useState("");
   const patternMin = new RegExp(/.{8,}/);

@@ -9,6 +9,7 @@ interface Props {
 
 const AuthContextProvider = ({children}: Props) => {
 
+  // kvuli cookies - jinak by stacilo zkontrolovat local storage
     const { data } = useAuth();
       
     const [value, dispatch] = useReducer(AuthReducer, null);

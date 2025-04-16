@@ -1,5 +1,6 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import taskService, { Task } from "../services/taskService";
+import { AxiosError } from "axios";
 
 interface TaskQuery {
   page: number;
@@ -26,6 +27,77 @@ const useTasks = (queryObject?: TaskQuery) => {
   });
 };
 
+export const useTasksWithUsers = () => {
+  return useQuery({
+    queryKey: ["tasks/with/users"],
+    queryFn: () => taskService.getDifferentRoute("with-users"),
+    throwOnError: true,
+  });
+}
+
+export const useTasksByUser = () => {
+  return useQuery({
+    queryKey: ["tasks/by/user"],
+    queryFn: () => taskService.getDifferentRoute("by-user"),
+    throwOnError: true,
+  });
+}
+
+export const useDeleteTask = (callback?: () => void) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['task/delete'],
+    mutationFn: (id: number) => taskService.delete(id),
+    throwOnError: true,
+    onSuccess: () => {
+
+      queryClient.invalidateQueries({queryKey: ["tasks/by/user"]});
+      queryClient.invalidateQueries({queryKey: ["tasks"]});
+      queryClient.invalidateQueries({queryKey: ["tasks/with/users"]});
+
+      if (callback) {
+        callback();
+      }
+    }
+  });
+}
+
+export const useGetOneTask = (id?: number) => {
+  return useQuery({
+    queryKey: id ? ['tasks', {id: id}] : [''],
+    queryFn: () => taskService.get(id),
+    throwOnError: true,
+    staleTime: 10 * 60000, // 10 minut
+  })
+}
+
+export const useEditTask = (callback?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['task/edit/'],
+    mutationFn: (data: Task) => taskService.put(data),
+    throwOnError: true,
+    onMutate(variables) {
+      //console.log('on mutate');
+      //console.log(variables);
+
+      // variables - to co tam posilam, optimistic update - zde updatnout cache?
+      
+      
+    },
+    onSuccess: (fromserver, varialbes, context) => {      
+      queryClient.invalidateQueries({queryKey: ['tasks', {id: varialbes.id}]});
+      queryClient.invalidateQueries({queryKey: ["tasks/by/user"]});
+      queryClient.invalidateQueries({queryKey: ["tasks"]});
+      queryClient.invalidateQueries({queryKey: ["tasks/with/users"]});
+      if (callback) {
+        callback();
+      }
+    }
+  })
+}
+
 export const useInfiniteTasks = (queryObject: TaskInfiniteQuery) => {
 
   return useInfiniteQuery({
@@ -45,24 +117,24 @@ export const useInfiniteTasks = (queryObject: TaskInfiniteQuery) => {
   })
 }
 
-export const useTask = (id: number) => {
+export const useTask = (id?: number) => {
   return useQuery({
-    queryKey: ["tasks/" + id],
+    queryKey: id ? ["tasks/" + id] : [],
     queryFn: () => taskService.get(id),
     throwOnError: true,
   });
 };
 
-export const usePostTask = (data: Task, callback?: () => void) => {
+export const usePostTask = (callback?: () => void) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => taskService.post(data),
+    mutationFn: (data: Task) => taskService.post(data),
     throwOnError: true,
     onSuccess() {
-      queryClient.invalidateQueries({
-        queryKey: ["tasks"],
-      });
+      queryClient.invalidateQueries({queryKey: ["tasks/by/user"]});
+      queryClient.invalidateQueries({queryKey: ["tasks"]});
+      queryClient.invalidateQueries({queryKey: ["tasks/with/users"]});
 
       if (callback) {
         callback();

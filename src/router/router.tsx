@@ -10,6 +10,7 @@ import ServerSideFiltering from "../UI/components/ServerSideFiltering";
 import OneTaskPage from "../UI/pages/OneTaskPage";
 import axios from "axios";
 import PrivateRoute from "../UI/layout/components/PrivateRoutes";
+import ModalIsOpenContextProvider from "../context/ModalIsOpenContextProvider";
 
 const router = createBrowserRouter([
   {
@@ -39,7 +40,11 @@ const router = createBrowserRouter([
       },
       {
         path: "tasks",
-        element: <TaskPage />,
+        element: (
+          <ModalIsOpenContextProvider>
+            <TaskPage />
+          </ModalIsOpenContextProvider>
+        ),
       },
       {
         path: "tasks_archive",
@@ -49,13 +54,16 @@ const router = createBrowserRouter([
         path: "task/:id",
         id: "task",
         loader: ({ params, request }) => {
-          
-           // commonly used na serachparametres - user neco hleda tak presmeruji na ?q=neco, loader to zachyti,
+          // commonly used na serachparametres - user neco hleda tak presmeruji na ?q=neco, loader to zachyti,
           // z url adresy si vesmu co chci a udelam request na server
 
           return axios.get("http://localhost:3001/api/tasks/" + params.id);
         },
-        element: <PrivateRoute><OneTaskPage /></PrivateRoute>,
+        element: (
+          <PrivateRoute>
+            <OneTaskPage />
+          </PrivateRoute>
+        ),
       },
     ],
   },
