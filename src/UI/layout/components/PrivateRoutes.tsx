@@ -3,16 +3,15 @@ import LoadingComponents from "../../components/LoadingComponents";
 import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import useNavigateWithMessage from "../../../hooks/useNavigateWithToast";
 import { useTranslation } from "react-i18next";
-import authContext from "../../../context/AuthContext";
+import useAuth from "../../../hooks/useAuth";
 
 interface Props {
   children: ReactNode;
 }
 
 const PrivateRoute = ({ children }: Props) => {
-  const { value } = useContext(authContext);
+  const { data, isLoading } = useAuth();
   const isFetching = useIsFetching();
-  const queryClient = useQueryClient();
   const navigateWithToast = useNavigateWithMessage();
   const { t } = useTranslation();
   
@@ -22,7 +21,7 @@ const PrivateRoute = ({ children }: Props) => {
     // - query client je taky context - proste picovina - jo tak neni zbytecnej - getQueryData totiz neni state - tudiz
     // react nepozna, ze je v tom neco jinyho tudiz se neprenace useEffect - takze potrebuju context, aby se nacital useEffect
     // priste vole nejakej zustand nebo neco, potrebuju i useFetching protoze kdyz nejsem prihlasenej tak value se nikdy nezmeni - bude furt null :))))
-    if (!queryClient.getQueryData(['auth']) && queryClient.getQueryState(['auth'])?.status !== "pending") {
+    if (!data && !isLoading) {
       navigateWithToast("/login", {
         duration: 4000,
         status: "info",
@@ -33,9 +32,9 @@ const PrivateRoute = ({ children }: Props) => {
     }
     // i kdyz je fetching = 0, tak ve value je null - proto jen menit pouze pokud se zmeni value
     // eslint-disable-next-line
-  }, [value, isFetching]);
+  }, [data, isFetching]);
 
-  return value ? <>{children}</> : <LoadingComponents />;
+  return data ? <>{children}</> : <LoadingComponents />;
 };
 
 export default PrivateRoute;

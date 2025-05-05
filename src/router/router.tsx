@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Outlet } from "react-router-dom";
 import Layout from "../UI/layout/Layout";
 import Error from "../UI/layout/components/Error";
 import HomePage from "../UI/pages/HomePage";
@@ -11,6 +11,8 @@ import OneTaskPage from "../UI/pages/OneTaskPage";
 import axios from "axios";
 import PrivateRoute from "../UI/layout/components/PrivateRoutes";
 import ModalIsOpenContextProvider from "../context/ModalIsOpenContextProvider";
+import UsersList from "../UI/pages/UsersList";
+import UserReviews from "../UI/pages/UserReviews";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +39,30 @@ const router = createBrowserRouter([
             <AccountPage />
           </PrivateRoute>
         ),
+      },
+      {
+        path: "users",
+        element: <Outlet />,
+        children: [
+          {
+            index: true,
+            element: <UsersList />
+          },
+          {
+            path: ":id",
+            element: <Outlet />,
+            children: [
+                {
+                  index: true,
+                  element: <AccountPage />,
+                },
+                {
+                  path: "reviews",
+                  element: <UserReviews />
+                }
+            ]
+          }
+        ]
       },
       {
         path: "tasks",

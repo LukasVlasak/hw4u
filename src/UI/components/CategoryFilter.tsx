@@ -1,84 +1,97 @@
-import { useEffect, useRef } from "react";
-import _ from "lodash";
-import { Checkbox, Text } from "@chakra-ui/react";
+import React, { ReactElement, useEffect, useState } from "react";
+import MultiSelectMenu from "./Multiselect";
+import { CheckboxGroup, Flex, Stack, Checkbox } from "@chakra-ui/react";
 
-interface Props<T, K extends Record<string, string>> {
-  onChange: (data: T[]) => void;
-  categories: K;
-  dataKey: keyof T;
-  data: T[];
+interface Props {
+  /**
+   * to co bude napsane na selectu
+   */
   name: string;
-  setCategory: (category: CategoryState<T>[] | undefined) => void;
-  category: { category: string; dataKey: keyof T }[] | undefined;
+  categories: string[];
+  setCategoryFiltered: (categoryFiltered: string[]) => void;
+  /**
+   * if true, reset selected options
+   */
+  resetSignal?: boolean;
+  /**
+   * for displaying div with color backgroud - to not just display color name but hex also, bacha na chakra Container vole ma to margin jak debil
+   */
+  elementsToDisplayWithOptions?: ReactElement[];
+  /**
+   * if it should display as multiselect that opens on click or as list with checkboxes, default as multiselect
+   */
+  asList?: boolean;
+  /**
+   * works only if isList=true
+   */
+  selectedCategories?: string[];
 }
 
-interface CategoryState<T> {
-  category: string;
-  dataKey: keyof T;
-}
-
-function CategoryFilter<T, K extends Record<string, string>>({
-  onChange,
-  categories,
-  dataKey,
-  data,
+function CategoryFilter({
   name,
-  category,
-  setCategory,
-}: Props<T, K>) {
-  const mounted = useRef(false);
+  categories,
+  selectedCategories,
+  setCategoryFiltered,
+  resetSignal,
+  elementsToDisplayWithOptions,
+  asList,
+}: Props) {
+  /**
+   * needed in asList, because i need to be able to reset values with resetSignal
+   */
+  const [values, setValues] = useState<string[]>([]);
 
-  const handleCategoryChange = (
-    name: string, // keyof K
-    dataKey: keyof T,
-    checked: boolean
-  ) => {
-    if (checked) {
-      setCategory(
-        category && category.length > 0
-          ? [...category, { category: name, dataKey: dataKey }]
-          : [{ category: name, dataKey: dataKey }]
-      );
-    } else {
-      setCategory(category?.filter((c) => c.category !== name));
+  // for sync two different CategoryFilter components
+  useEffect(() => {
+    if (selectedCategories) {
+      setValues(selectedCategories);
     }
-  };
+  }, [selectedCategories]);
 
   useEffect(() => {
-    if (!mounted.current) {
-      let filteredArray: T[] = data;
-      let filteredByCategories: T[] | undefined = undefined;
-
-      if (category && category.length > 0) {
-        let arraysOfFilteredData = category.map((c) =>
-          data.filter((d) => d[c.dataKey] === c.category)
-        );
-        filteredByCategories = _.intersection(...arraysOfFilteredData);
-      }
-      onChange(filteredByCategories || filteredArray);
+    if (resetSignal) {
+      // smaze se cely filtr kdyz tam je []
+      setCategoryFiltered([]);
+      setValues([]);
     }
-    mounted.current = false;
-  }, [category, data, onChange]);
-
-  return (
-    <div>
-      <Text mb={2}>{name}</Text>
-      {Object.values(categories).map((c, i) => {
-        return (
-          <div key={i}>
+  }, [resetSignal]);
+  return asList === undefined || asList === false ? (
+    <MultiSelectMenu
+      resetSignal={resetSignal}
+      label={name}
+      options={categories}
+      elementsToDisplayWithOptions={elementsToDisplayWithOptions}
+      onChange={(e) => setCategoryFiltered(e)}
+    />
+  ) : (
+    <CheckboxGroup
+      value={values}
+      onChange={(val) => {
+        setCategoryFiltered(val as string[]);
+        setValues(val as string[]);
+      }}
+    >
+      <Stack>
+        {categories.map((c, i) => {
+          return (
             <Checkbox
-              spacing={'3'}
+              key={i}
               value={c}
-              onChange={(e) => {
-                handleCategoryChange(c, dataKey, e.currentTarget.checked);
-              }}
             >
-              {c}
+              {elementsToDisplayWithOptions &&
+              elementsToDisplayWithOptions[i] ? (
+                <Flex alignItems={"center"} justifyContent={"left"}>
+                  {elementsToDisplayWithOptions[i]}
+                  {c}
+                </Flex>
+              ) : (
+                c
+              )}
             </Checkbox>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </Stack>
+    </CheckboxGroup>
   );
 }
 

@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import reviewService, { Review } from "../services/reviewService";
 
-export const useReviews = () => {
+export const useGetReviewsByUser = (id?: number) => {
   return useQuery({
-    queryKey: ["reviews"],
-    queryFn: () => reviewService.getAll(),
+    queryKey: id ? ["reviews", {userId: id}] : ["review-no-specified"],
+    queryFn: () => reviewService.getDifferentRouteWithId("by-user", id),
     throwOnError: true,
     staleTime: 30 * 60000, // 30 minut
   });
@@ -22,7 +22,25 @@ const usePostReview = (callback?: () => void) => {
       queryClient.invalidateQueries({
         queryKey: ["reviews"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["users"],
+      });
 
+      if (callback) {
+        callback();
+      }
+    },
+    throwOnError: true,
+  });
+};
+
+export const useDeleteReview = (callback?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => reviewService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reviews"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       if (callback) {
         callback();
       }

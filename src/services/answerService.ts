@@ -1,20 +1,17 @@
 import { APIClientFormData } from "./api-client";
-import { User } from "./userService";
-import { Document } from "./documentService";
-
-interface Tasks {
-    id: number;
-    title: string;
-}
 
 export interface Answer {
-    id: number;
-    user_id: number;
+    answer_id: number;
+    title: string;
+    full_answer: string;
+    preview?: string;
+    paid: boolean;
+    selected: boolean;
+    created_date: Date;
+    confirmed: boolean;
     task_id: number;
-    description: string;
-    tasks: Tasks;
-    for_user: Partial<User>[];
-    documents: Document[];
+    app_user_id: number;
+    updated_date?: Date;
 }
 
 const answerService = new APIClientFormData<Answer>("answers");

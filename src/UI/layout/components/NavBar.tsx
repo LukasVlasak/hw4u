@@ -27,8 +27,7 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { HiMiniChevronDown } from "react-icons/hi2";
 import { IoMdClose } from "react-icons/io";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import authContext from "../../../context/AuthContext";
-import { useLogout } from "../../../hooks/useAuth";
+import useAuth, { useLogout } from "../../../hooks/useAuth";
 import useNavigateWithToast from "../../../hooks/useNavigateWithToast";
 import LngSwitcher from "./LngSwitcher";
 
@@ -45,8 +44,7 @@ export default function NavBar() {
   const navigateWithToast = useNavigateWithToast();
   const { t } = useTranslation();
 
-  const { value } = useContext(authContext);
-
+  const { data: user } = useAuth();
   const { mutate } = useLogout(() => {
     // callback
     navigateWithToast("/", {
@@ -186,7 +184,7 @@ export default function NavBar() {
             <Link to={"/"}>
               <img
                 alt="company logo"
-                src="./logo.png"
+                src="/logo.png"
                 width={135}
                 className="pt-2"
                 height={45}
@@ -221,7 +219,7 @@ export default function NavBar() {
             </Flex>
           </Flex>
 
-          {!value ? (
+          {!user ? (
             <Stack
               flex={{ base: 1, md: 0 }}
               justify={"flex-end"}
@@ -272,7 +270,7 @@ export default function NavBar() {
                 icon={<FaRegUser />}
               />
               <MenuList color={"black"}>
-                <Link role="group" to={"/account"}>
+                <Link role="group" to={"/users/" + user[0].app_user_id}>
                   <MenuItem _groupHover={{ color: "brand.hoverBlueColor" }}>
                     {t("account.account")}
                   </MenuItem>

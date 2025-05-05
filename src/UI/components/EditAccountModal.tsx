@@ -25,7 +25,7 @@ import { Form } from "react-router-dom";
 import { useEditAccount } from "../../hooks/useUsers";
 import { useContext, useEffect, useState } from "react";
 import { User } from "../../services/userService";
-import authContext from "../../context/AuthContext";
+import useAuth from "../../hooks/useAuth";
 
 interface Props {
   isOpen: boolean;
@@ -35,8 +35,7 @@ interface FormData {
   username: string;
   email: string;
   password: string;
-  country: string;
-  name: string;
+  full_name: string;
 }
 
 const EditAccountModal = ({ onClose, isOpen }: Props) => {
@@ -44,14 +43,14 @@ const EditAccountModal = ({ onClose, isOpen }: Props) => {
   const patternMin = new RegExp(/.{8,}/);
   const patternUpperCase = new RegExp(/[A-Z]/);
   const patternNum = new RegExp(/[0-9]/);
-  const { value } = useContext(authContext);
+  const { data } = useAuth();
   const schema = Joi.object({
     username: Joi.string()
       .min(3)
       .max(15)
       // eslint-disable-next-line
       .regex(/[a-zA-Z0-9\.]/)
-      .required()
+      .allow("")
       .messages({
         "string.min": t("auth.usernameErrors.1"),
         "string.max": t("auth.usernameErrors.2"),
@@ -66,10 +65,10 @@ const EditAccountModal = ({ onClose, isOpen }: Props) => {
       .min(8)
       .allow("")
       .messages({ "string.min": "", "string.pattern.base": "" }),
-    country: Joi.string().required(),
-    name: Joi.string()
+    full_name: Joi.string()
       .min(3)
       .max(30)
+      .required()
       .regex(/[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ]/)
       .messages({
         "string.min": t("auth.nameErrors.1"),
@@ -97,15 +96,15 @@ const EditAccountModal = ({ onClose, isOpen }: Props) => {
     onClose();
   });
   const onSubmit = (formData: FieldValues) => {
+    console.log(formData);
     mutate(formData as User);
   };
 
   useEffect(() => {
-    if (value) {
-      setValue("name", value.name);
-      setValue("email", value.email);
-      setValue("country", value.country);
-      setValue("username", value.username);
+    if (data) {
+      setValue("full_name", data[0].full_name);
+      setValue("email", data[0].email);
+      setValue("username", data[0].username ? data[0].username : "");
     }
   }, [isOpen]);
   return (
@@ -117,16 +116,16 @@ const EditAccountModal = ({ onClose, isOpen }: Props) => {
         <ModalHeader>{t("account.editAccount")}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-            <FormControl isInvalid={errors.name ? true : false}>
+            <FormControl isInvalid={errors.full_name ? true : false}>
               <FormLabel>{t("auth.name")}</FormLabel>
               <Input
                 autoComplete="name"
-                {...register("name")}
-                name="name"
+                {...register("full_name")}
+                name="full_name"
                 type="text"
               />
-              {errors.name ? (
-                <FormErrorMessage>{errors.name.message}</FormErrorMessage>
+              {errors.full_name ? (
+                <FormErrorMessage>{errors.full_name.message}</FormErrorMessage>
               ) : null}
             </FormControl>
             <FormControl
@@ -250,13 +249,6 @@ const EditAccountModal = ({ onClose, isOpen }: Props) => {
                     </UnorderedList>
                   </>
                 ) : null
-              ) : null}
-            </FormControl>
-            <FormControl mt={2} isInvalid={errors.country ? true : false}>
-              <FormLabel>{t("auth.country")}</FormLabel>
-              <Input {...register("country")} name="country" type="text" />
-              {errors.country ? (
-                <FormErrorMessage>{errors.country.message}</FormErrorMessage>
               ) : null}
             </FormControl>
         </ModalBody>

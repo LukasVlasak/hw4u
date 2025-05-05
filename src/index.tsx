@@ -9,7 +9,6 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./utils/theme";
 import "./i18n";
-import AuthContextProvider from "./context/AuthContextProvider";
 import "bootstrap/dist/css/bootstrap.css";
 
 const root = ReactDOM.createRoot(
@@ -30,9 +29,7 @@ const queryClient = new QueryClient({
 root.render(
     <ChakraProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-        <AuthContextProvider>
-          <RouterProvider router={router} />
-        </AuthContextProvider>
+        <RouterProvider router={router} />
         <ReactQueryDevtools />
       </QueryClientProvider>
     </ChakraProvider>

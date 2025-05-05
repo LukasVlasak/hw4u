@@ -1,12 +1,15 @@
 import APIClient from "./api-client";
 
 export interface Review {
-    id: number;
-    user_id: number;
-    text: string;
+    review_id: number;
+    app_user_id: number;
+    for_app_user_id: number;
     stars: number;
-    user_name: string;
-    created_date?: Date;
+    text?: string;
+    created_date: Date;
+
+    username?: string;
+    full_name?: string;
 }
 
 const reviewService = new APIClient<Review>("reviews");

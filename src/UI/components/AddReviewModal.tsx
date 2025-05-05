@@ -9,63 +9,48 @@ import {
   Button,
   useToast,
   Textarea,
+  Text,
   Heading,
 } from "@chakra-ui/react";
 import { t } from "i18next";
-import React, { useContext, useRef } from "react";
-import authContext from "../../context/AuthContext";
+import React, { useContext, useRef, useState } from "react";
 import usePostReview from "../../hooks/useReviews";
 import { Review } from "../../services/reviewService";
 import ReactStars from "react-stars";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  onAddReview: (review: Pick<Review, "stars" | "text">) => void;
 }
 
-const AddReviewModal = ({ isOpen, onClose }: Props) => {
+const AddReviewModal = ({ isOpen, onClose, onAddReview }: Props) => {
   const textRef = useRef<HTMLTextAreaElement>(null);
-  const starsRef = useRef<number>(-1);
-  const toast = useToast();
-  const { value } = useContext(authContext);
-
-  const { mutate: postReview } = usePostReview(() => {
-    // callback
-    toast({
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-      title: t("successPost"),
-      description: t("homePage.reviews.successPostDesc"),
-    });
-  });
+  const starsRef = useRef<number>(1);
+  const [textError, setTextError] = useState(false);
+  const { t } = useTranslation();
 
   const handleReviewAdd = () => {
-    if (
-      starsRef.current !== null &&
-      textRef.current !== null &&
-      starsRef.current !== -1 &&
-      value !== null &&
-      textRef.current.value.length > 10
-    ) {
+    if (textRef.current !== null && starsRef.current !== null) {
+      if (textRef.current.value.length < 10) {
+        setTextError(true);
+        return;
+      } else {
+        setTextError(false);
+      }
+
       const review = {
         text: textRef.current.value,
         stars: starsRef.current,
-        user_name: value.name,
-        user_id: value.id,
       };
 
-      postReview(review as unknown as Review);
-      textRef.current.value = "";
+      onAddReview(review);
+
+      if (textRef.current) {
+        textRef.current.value = "";
+      }
       onClose();
-    } else {
-      toast({
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-        title: t("errorPost"),
-        description: t("homePage.reviews.errorPostDesc"),
-      });
     }
   };
   return (
@@ -76,17 +61,17 @@ const AddReviewModal = ({ isOpen, onClose }: Props) => {
         <ModalCloseButton />
         <ModalBody>
           <Heading size={"sm"}>{t("tasks.description")}</Heading>
-          <Textarea
-            ref={textRef}
-            name=""
-            id=""
-            placeholder={t("review")}
-          ></Textarea>
+          <Textarea isInvalid={textError} ref={textRef} name="" id="" placeholder={t("review")}></Textarea>
+          {textError && (
+            <Text color={"red.500"} fontSize={"sm"}>
+              {t("homePage.reviews.reviewError")}
+            </Text>
+          )}
           <Heading mt={4} size={"sm"}>
             {t("stars")}
           </Heading>
           <ReactStars
-            value={0}
+            value={1}
             edit={true}
             onChange={(newRating) => {
               if (starsRef.current) {

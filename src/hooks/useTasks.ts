@@ -35,10 +35,10 @@ export const useTasksWithUsers = () => {
   });
 }
 
-export const useTasksByUser = () => {
+export const useTasksByUser = (id?: number) => {
   return useQuery({
-    queryKey: ["tasks/by/user"],
-    queryFn: () => taskService.getDifferentRoute("by-user"),
+    queryKey: id ? ["user/tasks/" + id] : [""],
+    queryFn: () => taskService.getDifferentRouteWithId("by-user", id),
     throwOnError: true,
   });
 }
@@ -76,7 +76,7 @@ export const useEditTask = (callback?: () => void) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ['task/edit/'],
-    mutationFn: (data: Task) => taskService.put(data),
+    mutationFn: (data: Task) => taskService.put(data, data.task_id),
     throwOnError: true,
     onMutate(variables) {
       //console.log('on mutate');
@@ -87,7 +87,7 @@ export const useEditTask = (callback?: () => void) => {
       
     },
     onSuccess: (fromserver, varialbes, context) => {      
-      queryClient.invalidateQueries({queryKey: ['tasks', {id: varialbes.id}]});
+      queryClient.invalidateQueries({queryKey: ['tasks', {id: varialbes.task_id}]});
       queryClient.invalidateQueries({queryKey: ["tasks/by/user"]});
       queryClient.invalidateQueries({queryKey: ["tasks"]});
       queryClient.invalidateQueries({queryKey: ["tasks/with/users"]});

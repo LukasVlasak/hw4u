@@ -38,7 +38,7 @@ import { Task } from "../../services/taskService";
 import formatDateToDDMMYYYY from "../../utils/fc";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import authContext from "../../context/AuthContext";
+import useAuth from "../../hooks/useAuth";
 
 const ModalTopSection = styled("div")({
   padding: "12px",
@@ -85,7 +85,7 @@ const TaskModalContent = ({ task, nextTask, previousTask }: Props) => {
   const sideArrow = useRef<HTMLDivElement>(null);
   const descRef = useRef<HTMLDivElement>(null);
   const accordionRef = useRef<HTMLDivElement>(null);
-  const { value: user } = useContext(authContext);
+  const { data: user } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -229,7 +229,7 @@ const TaskModalContent = ({ task, nextTask, previousTask }: Props) => {
                   mr={3}
                   maxWidth={'fit-content'}
                   isDisabled={user ? false : true}
-                  onClick={() => navigate("/task/" + task.id)}
+                  onClick={() => navigate("/task/" + task.task_id)}
                 >
                   Answer
                 </Button>
@@ -271,7 +271,7 @@ const TaskModalContent = ({ task, nextTask, previousTask }: Props) => {
           >
             <Item
               heading="Willing to pay"
-              text={task?.willing_to_pay.toString()}
+              text={task.price.toString()}
               Icon={<BsCash />}
             />
             <Item
@@ -288,12 +288,13 @@ const TaskModalContent = ({ task, nextTask, previousTask }: Props) => {
                 headingPad
               />
             ) : null}
-            <Item
+            TODO: kategorie
+            {/* <Item
               heading="Category"
-              text={task?.category}
+              text={task?.category}Í
               Icon={<BiCategory />}
               headingPad
-            />
+            /> */}
           </Flex>
         </Flex>
       </ModalBody>

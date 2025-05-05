@@ -3,10 +3,17 @@ import userService, { User } from "../services/userService";
 import { AxiosError, AxiosResponse } from "axios";
 import { ErrorCode } from "../services/api-client";
 
+export const useGetUsers = () => {
+  return useQuery({
+    queryKey: ["users"],
+    queryFn: () => userService.getAll(),
+    throwOnError: true,
+  });
+}
 
 export const useGetOneUser = (id?: number) => {
   return useQuery({
-    queryKey: id ? ['users/' + id] : [''],
+    queryKey: id ? ['users', {id: id}] : [''],
     queryFn: () => userService.get(id),
     throwOnError: true,
   });
@@ -17,12 +24,12 @@ export const useEditAccount = (callback?: () => void) => {
 
   return useMutation<AxiosResponse<User>, AxiosError<ErrorCode>, User>({
     mutationFn: (data: User) => userService.putCurrentUser(data),
-    onSuccess: (response, userPassedToFunction) => {
-
+    onSuccess: (response, userPassedToFunction) => {      
       // invalid query
       queryClient.invalidateQueries({
-        queryKey: ["users"],
+        queryKey: ["users"]
       });
+
       queryClient.invalidateQueries({
         queryKey: ["auth"],
       });
@@ -45,16 +52,12 @@ const useRegister = (callback?: () => void) => {
     mutationFn: (data: User) => userService.post(data),
     onSuccess: (response, userPassedToFunction) => {
 
-      const authToken = response.headers["x-auth-token"];
-      localStorage.setItem("x-auth-token", authToken);
-
       // invalid query
       queryClient.invalidateQueries({
         queryKey: ["users"],
       });
-      queryClient.invalidateQueries({
+      queryClient.resetQueries({
         queryKey: ["auth"],
-        
       });
       
       if (callback) {

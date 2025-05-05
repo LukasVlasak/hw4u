@@ -1,3 +1,12 @@
 html, body, #root {
   min-height: 100%
 }
+
+.link {
+  color: #0070f3;
+  text-decoration: underline;
+}
+
+.no-color-link {
+  text-decoration: underline;
+}

@@ -34,8 +34,11 @@ i18n
           homePage: {
             reviews: {
               noReviewsAvailable: "Sorry, no reviews available",
-              successPostDesc: "Your review was successfully created, thank you!",
-              errorPostDesc: "Please enter valid values - stars are required and review text must be at least 10 characters long"
+              successPostDesc: "Your review was successfully created",
+              errorPostDesc: "Please enter valid values - stars are required and review text must be at least 10 characters long",
+              reviewError: "Min 10 characters",
+              averageRating: "Average rating",
+              noRating: "No rating yet",
             },
             whyUs: {
               telephoneAssistance: "Telephone assistance",
@@ -148,7 +151,8 @@ i18n
             addReview: "Add review",
             editAccount: "Edit account",
             accountEditted: "Account editted",
-            accountEdittedDesc: "Account was successfully editted"
+            accountEdittedDesc: "Account was successfully editted",
+            showReviews: "Show reviews",
           },
           answers: {
             answerToTask: "Answer to task",
@@ -184,6 +188,16 @@ i18n
           },
           subscripe: {
             subscripe: "Subscripe"
+          },
+          feedback: {
+            feedback: "Feedback",
+            min: "Min 10 characters",
+            max: "Max 300 characters",
+            pattern: "Message contains unallowed characters",
+            feedbackSent: "Feedback sent",
+            addFeedback: "Add feedback",
+            submit: "Submit",
+            message: "Message for us",
           }
         },
       },
@@ -208,8 +222,11 @@ i18n
           homePage: {
             reviews: {
               noReviewsAvailable: "Nenašli jsme žádné recenze",
-              successPostDesc: "Vaše recenze byla úspěšně zaevidována, děkujeme!",
-              errorPostDesc: "Prosíme zadejte platné hodnoty - hvězdy jsou povinné a obsah recenze musí být nejméně 10 písmen dlouhý"
+              successPostDesc: "Vaše recenze byla úspěšně zaevidována",
+              errorPostDesc: "Prosíme zadejte platné hodnoty - hvězdy jsou povinné a obsah recenze musí být nejméně 10 písmen dlouhý",
+              reviewError: "Min 10 znaků",
+              averageRating: "Průměrné hodnocení",
+              noRating: "Zatím bez hodnocení",
             },
             whyUs: {
               telephoneAssistance: "Telefonická pomoc",
@@ -322,7 +339,8 @@ i18n
             addReview: "Přidat recenzi",
             editAccount: "Upravit profil",
             accountEditted: "Profil upraven",
-            accountEdittedDesc: "Profil byl úspěšně upraven"
+            accountEdittedDesc: "Profil byl úspěšně upraven",
+            showReviews: "Zobrazit recenze",
           },
           answers: {
             answerToTask: "Odpověď na úkol",
@@ -358,6 +376,16 @@ i18n
           },
           subscripe: {
             subscripe: "Odebírejte"
+          },
+          feedback: {
+            feedback: "Zpětná vazba",
+            min: "Minimálně 10 znaků",
+            max: "Maximálně 300 znaků",
+            pattern: "Zpráva obsahuje nepovolené znaky",
+            feedbackSent: "Zpětná vazba odeslána",
+            addFeedback: "Přidat zpětnou vazbu",
+            submit: "Odeslat",
+            message: "Zpráva pro nás",            
           }
         },
       },

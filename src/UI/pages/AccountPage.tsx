@@ -1,7 +1,6 @@
 import { useContext, useEffect, useRef, useState, MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
-import authContext from "../../context/AuthContext";
-import { useLogout } from "../../hooks/useAuth";
+import useAuth, { useLogout } from "../../hooks/useAuth";
 import useNavigateWithToast from "../../hooks/useNavigateWithToast";
 import LoadingComponents from "../components/LoadingComponents";
 import usePostReview from "../../hooks/useReviews";
@@ -37,109 +36,152 @@ import { PartialWithId } from "../../interfaces/interfaces";
 import formatDateToDDMMYYYY, { deleteConfirm } from "../../utils/fc";
 import { useDeleteTask, useTasksByUser } from "../../hooks/useTasks";
 import TaskEditModal from "../components/TaskEditModal";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAnswersByUser, useDeleteAnswer } from "../../hooks/useAnswers";
 import React from "react";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdEdit } from "react-icons/md";
 import { Interweave } from "interweave";
 import AddReviewModal from "../components/AddReviewModal";
 import EditAccountModal from "../components/EditAccountModal";
+import AddFeedbackModal from "../components/AddFeedbackModal";
+import { useGetOneUser } from "../../hooks/useUsers";
+import { Review } from "../../services/reviewService";
 
 const AccountPage = () => {
+  const params = useParams();
+  
   const navigateWithToast = useNavigateWithToast();
   const toast = useToast();
-  const { value } = useContext(authContext);
+  const { data: currUser } = useAuth();
+  const { data: user } = useGetOneUser(parseInt(params.id ?? ""));
   const { t } = useTranslation();
   const { data, isLoading } = useTasksByUser();
-  const { data: answers, isLoading: isAnswersLoading } = useAnswersByUser();
+  //const { data: answers, isLoading: isAnswersLoading } = useAnswersByUser();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isOpenReview, onOpen: onOpenReview, onClose: onCloseReview } = useDisclosure();
   const { isOpen: isOpenAccount, onOpen: onOpenAccount, onClose: onCloseAccount } = useDisclosure();
+  const { isOpen: isFeedbackOpen, onOpen: onFeedbackOpen, onClose: onFeedbackClose } = useDisclosure();
 
   const [taskId, setTaskId] = useState<number | undefined>(undefined);
-  
-  const { mutate: deleteTask } = useDeleteTask(() => {
+
+
+  const { mutate: postReview } = usePostReview(() => {
+    // callback
     toast({
       status: "success",
       duration: 5000,
       isClosable: true,
-      title: t("deleteSuccess"),
-      description: t("tasks.deleteSuccessDesc"),
+      title: t("successPost"),
+      description: t("homePage.reviews.successPostDesc"),
     });
   });
 
-  const { mutate } = useLogout(() => {
-    // callback
-    navigateWithToast("/", {
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-      title: t("auth.successSignOut"),
-      description: t("auth.successSignOutDesc"),
-    });
-  });
+  
+  // const { mutate: deleteTask } = useDeleteTask(() => {
+  //   toast({
+  //     status: "success",
+  //     duration: 5000,
+  //     isClosable: true,
+  //     title: t("deleteSuccess"),
+  //     description: t("tasks.deleteSuccessDesc"),
+  //   });
+  // });
 
   const navigate = useNavigate();
-  const handleEdit = (id: number, e: MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    onOpen();
-    setTaskId(id);
-  };
+  // const handleEdit = (id: number, e: MouseEvent<HTMLButtonElement>) => {
+  //   e.stopPropagation();
+  //   onOpen();
+  //   setTaskId(id);
+  // };
 
-  const handleDelete = (id: number, e: MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    if (deleteConfirm(t("deleteConfirm"))) {
-      deleteTask(id);
-    }
-  };
+  // const handleDelete = (id: number, e: MouseEvent<HTMLButtonElement>) => {
+  //   e.stopPropagation();
+  //   if (deleteConfirm(t("deleteConfirm"))) {
+  //     deleteTask(id);
+  //   }
+  // };
 
   
 
-  const { mutate: mutateDelAnswer } = useDeleteAnswer(() => {
-    toast({
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-      title: t("deleteSuccess"),
-      description: t("answers.deleteSuccessDesc"),
-    });
-  });
+  // const { mutate: mutateDelAnswer } = useDeleteAnswer(() => {
+  //   toast({
+  //     status: "success",
+  //     duration: 5000,
+  //     isClosable: true,
+  //     title: t("deleteSuccess"),
+  //     description: t("answers.deleteSuccessDesc"),
+  //   });
+  // });
 
-  const handleAddTask = () => {
-    setTaskId(undefined);
-    onOpen();
-  };
+  // const handleAddTask = () => {
+  //   setTaskId(undefined);
+  //   onOpen();
+  // };
 
-  const handleRowClick = (rowId: number) => {
-    navigate("/task/" + rowId);
-  };
+  // const handleRowClick = (rowId: number) => {
+  //   navigate("/task/" + rowId);
+  // };
 
-  const handleAnswerDelete = (id: number) => {
-    if (deleteConfirm(t("deleteConfirm"))) {
-      mutateDelAnswer(id);
-    }
-  };
+  // const handleAnswerDelete = (id: number) => {
+  //   if (deleteConfirm(t("deleteConfirm"))) {
+  //     mutateDelAnswer(id);
+  //   }
+  // };
 
-  return value ? (
+  return user ? (
     <>
+    <Button onClick={() => navigate("/users")}>Zpět</Button>
     <EditAccountModal isOpen={isOpenAccount} onClose={onCloseAccount} />
-      <AddReviewModal isOpen={isOpenReview} onClose={onCloseReview} />
-      <TaskEditModal id={taskId} onClose={onClose} isOpen={isOpen} />
+      <AddReviewModal isOpen={isOpenReview} onClose={onCloseReview} onAddReview={(r) => {
+        const review = {
+          ...r,
+          for_app_user_id: user.app_user_id,
+        };
+        postReview(review as Review);
+      }} />
+      {/* <TaskEditModal id={taskId} onClose={onClose} isOpen={isOpen} /> */}
+      <AddFeedbackModal isOpen={isFeedbackOpen} onClose={onFeedbackClose} />
       <div>
       <Card>
   <CardHeader>
-    <Heading size='lg'>{t("account.accountInformation")}</Heading>
+    <Flex justifyContent={'space-between'} alignItems={'center'}>
+      <Heading size='lg'>{t("account.accountInformation")}</Heading>
+      {user && currUser && user.app_user_id === currUser[0].app_user_id ? <IconButton aria-label={"edit user profile"} colorScheme="blue" onClick={() => onOpenAccount()} icon={<MdEdit />}>{t("account.editAccount")}</IconButton> : null}
+    </Flex>
   </CardHeader>
 
   <CardBody>
     <Stack divider={<StackDivider />} spacing='4'>
       <Box>
         <Heading size='xs' textTransform='uppercase'>
-          E-mail
+          {t("homePage.reviews.averageRating")}
+        </Heading>
+        <Flex pt='2' fontSize='sm'>
+          {user.average_rating ? (
+            <Flex flexDir={'column'}>
+            <ReactStars
+              count={5}
+              // @ts-ignore
+              value={parseFloat(user.average_rating)}
+              size={24}
+              edit={false}
+              color2={'#ffd700'}
+              half={true}
+            />
+            <Link className="link" to={"reviews"}>{t("account.showReviews")}</Link>
+            </Flex>
+          ) : (
+            <Text>{t("homePage.reviews.noRating")}</Text>
+          )}
+        </Flex>
+      </Box>
+      <Box>
+        <Heading size='xs' textTransform='uppercase'>
+          {t("auth.email")}
         </Heading>
         <Text pt='2' fontSize='sm'>
-        {value.email}
+        {user.email}
         </Text>
       </Box>
       <Box>
@@ -147,7 +189,7 @@ const AccountPage = () => {
         {t("account.name")}
         </Heading>
         <Text pt='2' fontSize='sm'>
-          {value.name}
+          {user.full_name}
         </Text>
       </Box>
       <Box>
@@ -155,7 +197,7 @@ const AccountPage = () => {
         {t("account.username")}
         </Heading>
         <Text pt='2' fontSize='sm'>
-        {value.username}
+        {user.username}
         </Text>
       </Box>
       <Box>
@@ -163,9 +205,9 @@ const AccountPage = () => {
         {t("account.actions")}
         </Heading>
         <Text pt='2' fontSize='sm'>
-          <Button mr={2} colorScheme="blue" onClick={handleAddTask}>{t("account.addTask")}</Button>
-          <Button mr={2} colorScheme="blue" onClick={() => onOpenReview()}>{t("account.addReview")}</Button>
-          <Button colorScheme="blue" onClick={() => onOpenAccount()}>{t("account.editAccount")}</Button>
+          {/* <Button mr={2} colorScheme="blue" onClick={handleAddTask}>{t("account.addTask")}</Button> */}
+          {user && currUser && user.app_user_id !== currUser[0].app_user_id ? <Button mr={2} colorScheme="blue" onClick={() => onOpenReview()}>{t("account.addReview")}</Button> : null}
+          {user && currUser && user.app_user_id === currUser[0].app_user_id ? <Button mr={2} colorScheme="blue" onClick={() => onFeedbackOpen()}>{t("feedback.addFeedback")}</Button> : null}
         </Text>
       </Box>
     </Stack>
@@ -177,148 +219,12 @@ const AccountPage = () => {
             <Tab>{t("account.addedTasks")}</Tab>
           </TabList>
           <TabPanels>
-            <TabPanel>
-              {isAnswersLoading ? (
-                <LoadingComponents />
-              ) : answers && answers.length > 0 ? (
-                <>
-                  <Heading size="md">{t("answers.answers")}</Heading>
-
-                  <Accordion allowToggle>
-                    {answers.map((a, i) => {
-                      return (
-                        <React.Fragment key={a.id}>
-                          <AccordionItem>
-                            <h2>
-                              <AccordionButton>
-                                <Box as="span" flex="1" textAlign="left">
-                                  {t("answers.answer") + " č." + (i+1)}
-                                </Box>
-                                <AccordionIcon />
-                              </AccordionButton>
-                            </h2>
-                            <AccordionPanel pb={4}>
-                              <Box>
-                                <Flex flexDir={'row'} justifyContent={'space-between'}>
-                                <Heading size="xs" textTransform="uppercase">
-                                  {t("answers.answerToTask")}
-                                </Heading>
-                                {value && value.id === a.user_id ? (
-                                <Flex>
-                                  <IconButton
-                                    onClick={() => handleAnswerDelete(a.id)}
-                                    aria-label="Delete"
-                                    colorScheme="red"
-                                    icon={<MdDelete />}
-                                  />
-                                </Flex>
-                              ) : null}
-                              </Flex>
-                                <Text pt="2" fontSize="sm">
-                                  <Link style={{textDecoration: "underline", color: "blue"}} to={"/task/" + a.tasks.id}>
-                                    {a.tasks.title}
-                                  </Link>
-                                </Text>
-                              </Box>
-                              <Box>
-                                <Heading size="xs" textTransform="uppercase">
-                                  {t("answers.postedBy")}
-                                </Heading>
-                                <Text pt="2" fontSize="sm">
-                                  {a.for_user[0].name}{" "}
-                                </Text>
-                              </Box>
-                              <Box>
-                                <Heading size="xs" textTransform="uppercase">
-                                  {t("answers.files")}
-                                </Heading>
-                                {a.documents ? (
-                                  a.documents.map((d) => {
-                                    return (
-                                      <a
-                                        style={{textDecoration: "underline", color: 'blue'}}
-                                        href={
-                                          "http://localhost:3001/api/documents/" +
-                                          d.filename
-                                        }
-                                      >
-                                        {d.filename}
-                                      </a>
-                                    );
-                                  })
-                                ) : (
-                                  <Text pt="2" fontSize="sm">
-                                    {t("answers.withoutDocument")}
-                                  </Text>
-                                )}
-                              </Box>
-                              <Box>
-                                <Heading size="xs" mt={2} textTransform="uppercase">
-                                  {t("answers.description")}
-                                </Heading>
-                                  <Interweave content={a.description}></Interweave>
-                              </Box>
-                            </AccordionPanel>
-                          </AccordionItem>
-                        </React.Fragment>
-                      );
-                    })}
-                  </Accordion>
-                </>
-              ) : <Heading size={'md'} mt={4}>{t("answers.noAnswers")}</Heading>}
-            </TabPanel>
+            
             <TabPanel>
               {isLoading ? (
                 <LoadingComponents />
               ) : data ? (
-                <DataGrid<PartialWithId<Task>>
-                  columns={[
-                    "Titul",
-                    "Ochoten Zaplatit",
-                    "Kategorie",
-                    "Do data",
-                    "Vytvoril",
-                    "Created",
-                  ]}
-                  rows={data.map(
-                    ({
-                      description,
-                      user_id,
-                      id,
-                      created_date,
-                      due_date,
-                      title,
-                      willing_to_pay,
-                      category,
-                      for_user,
-                    }) => {
-                      const formatted_created_date =
-                        formatDateToDDMMYYYY(created_date);
-                      const formatted_due_date = formatDateToDDMMYYYY(due_date);
-                      let name = null;
-                      if (user_id) {
-                        name = for_user[0].name;
-                      }
-                      return {
-                        id,
-                        title,
-                        willing_to_pay,
-                        category,
-                        formatted_due_date,
-                        name,
-                        formatted_created_date,
-                      };
-                    }
-                  )}
-                  pagination={{
-                    defaultPageSize: 10,
-                    pageSizesToChoose: [5, 10, 15, 20],
-                  }}
-                  sort
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onRowClick={handleRowClick}
-                />
+                <p>todo datagrid</p>
               ) : null}
             </TabPanel>
           </TabPanels>
@@ -330,4 +236,56 @@ const AccountPage = () => {
   );
 };
 
+
+//   <DataGrid<PartialWithId<Task>>
+              //     columns={[
+              //       "Titul",
+              //       "Ochoten Zaplatit",
+              //       "Kategorie",
+              //       "Do data",
+              //       "Vytvoril",
+              //       "Created",
+              //     ]}
+              //     rows={data.map(
+              //       ({
+              //         description,
+              //         user_id,
+              //         id,
+              //         created_date,
+              //         due_date,
+              //         title,
+              //         willing_to_pay,
+              //         category,
+              //         for_user,
+              //       }) => {
+              //         const formatted_created_date =
+              //           formatDateToDDMMYYYY(created_date);
+              //         const formatted_due_date = formatDateToDDMMYYYY(due_date);
+              //         let name = null;
+              //         if (user_id) {
+              //           name = for_user[0].name;
+              //         }
+              //         return {
+              //           id,
+              //           title,
+              //           willing_to_pay,
+              //           category,
+              //           formatted_due_date,
+              //           name,
+              //           formatted_created_date,
+              //         };
+              //       }
+              //     )}
+              //     pagination={{
+              //       defaultPageSize: 10,
+              //       pageSizesToChoose: [5, 10, 15, 20],
+              //     }}
+              //     sort
+              //     onEdit={handleEdit}
+              //     onDelete={handleDelete}
+              //     onRowClick={handleRowClick}
+              //   />
+              // ) : null}
+
 export default AccountPage;
+
