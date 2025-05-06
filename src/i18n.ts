@@ -15,6 +15,9 @@ i18n
     resources: {
       en: {
         translation: {
+          admin: {
+            administration: "Administration",
+          },
           stars: "Stars",
           successPost: "Successfully added",
           errorPost: "There was an error",
@@ -203,6 +206,9 @@ i18n
       },
       cs: {
         translation: {
+          admin: {
+            administration: "Administrace",
+          },
           review: "Recenze",
           stars: "Hvězdy",
           successPost: "Úspěšně přidáno",

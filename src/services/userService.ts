@@ -8,6 +8,7 @@ export interface User {
     password: string;
     username?: string;
     average_rating?: number;
+    is_admin: boolean;
 }
 
 const userService = new APIClient<User>("users");

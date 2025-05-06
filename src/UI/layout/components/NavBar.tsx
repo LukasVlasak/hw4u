@@ -285,6 +285,13 @@ export default function NavBar() {
                     {t("subscripe.subscripe")}
                   </MenuItem>
                 </Link>
+                {user[0].is_admin === true && (
+                  <Link role="group" to={"/administration"}>
+                    <MenuItem _groupHover={{ color: "brand.hoverBlueColor" }}>
+                      {t("admin.administration")}
+                    </MenuItem>
+                  </Link>
+                )}
                 <MenuItem
                   _hover={{ color: "brand.hoverBlueColor" }}
                   onClick={handleSignOut}

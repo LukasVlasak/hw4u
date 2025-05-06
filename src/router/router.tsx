@@ -13,6 +13,9 @@ import PrivateRoute from "../UI/layout/components/PrivateRoutes";
 import ModalIsOpenContextProvider from "../context/ModalIsOpenContextProvider";
 import UsersList from "../UI/pages/UsersList";
 import UserReviews from "../UI/pages/UserReviews";
+import PrivateAdminRoute from "../UI/layout/components/PrivateAdminRoute";
+import SidebarWithHeader from "../UI/layout/AdminLayout";
+import Dashboard from "../UI/pages/administration/Dashboard";
 
 const router = createBrowserRouter([
   {
@@ -93,6 +96,20 @@ const router = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "/administration",
+    element: (
+      <PrivateAdminRoute>
+        <SidebarWithHeader />
+      </PrivateAdminRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Dashboard />,
+      }
+    ]
+  }
 ]);
 
 export default router;
