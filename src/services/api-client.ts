@@ -125,11 +125,24 @@ class APIClient<T> {
       .then((res) => res.data);
   }
 
+  deleteDiferentRoute(route: string, id: number) {
+    return axiosInstance
+      .delete<T>(this.endpoint + "/" + route + "/" + id)
+      .then((res) => res.data);
+  }
+
   put(data: T, id: number) {
     return axiosInstance
       .put<T>(this.endpoint + "/" + id, data)
       .then((res) => res);
   }
+
+  putDifferentRoute(data: T, id: number, route: string) {
+    return axiosInstance
+      .put<T>(this.endpoint + "/" + route + "/" + id, data)
+      .then((res) => res);
+  }
+
 
   putCurrentUser(data: T) {
     return axiosInstance

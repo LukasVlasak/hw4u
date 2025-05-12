@@ -14,8 +14,8 @@ import {
 } from "@chakra-ui/react";
 import { t } from "i18next";
 import React, { useContext, useRef, useState } from "react";
-import usePostReview from "../../hooks/useReviews";
-import { Review } from "../../services/reviewService";
+import usePostReview from "../../../hooks/useReviews";
+import { Review } from "../../../services/reviewService";
 import ReactStars from "react-stars";
 import { useTranslation } from "react-i18next";
 

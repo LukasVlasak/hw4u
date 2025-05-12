@@ -5,6 +5,8 @@ export interface Product {
     name: string;
     price: number;
     answer_limit: number;
+    active: boolean;
+    answered?: number;
 }
 
 const productService = new APIClient<Product>("product");

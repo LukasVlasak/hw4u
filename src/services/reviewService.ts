@@ -10,6 +10,8 @@ export interface Review {
 
     username?: string;
     full_name?: string;
+    email?: string;
+    for_user_email?: string;
 }
 
 const reviewService = new APIClient<Review>("reviews");

@@ -10,6 +10,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./utils/theme";
 import "./i18n";
 import "bootstrap/dist/css/bootstrap.css";
+import "react-day-picker/dist/style.css";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,

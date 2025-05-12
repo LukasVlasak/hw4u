@@ -7,6 +7,7 @@ export interface Feedback {
     created_date: Date;
     app_user_id: number;
     full_name: string;
+    email: string;
 }
 
 const feedbackService = new APIClient<Feedback>("feedback");

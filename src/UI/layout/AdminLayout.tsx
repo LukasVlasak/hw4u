@@ -299,7 +299,7 @@ import { CiMoneyBill } from "react-icons/ci";
             <Flex alignItems={"center"}>
               <Link to={"/"}>
                 <Button variant={"outline"} mr={6} colorScheme="blue">
-                  Přepnout do e-shopu
+                  Přepnout do aplikace
                 </Button>
               </Link>
               <Menu>

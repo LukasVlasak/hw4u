@@ -10,6 +10,50 @@ export const useFeedback = () => {
   });
 };
 
+export const useGetOneFeedback = (id?: number) => {
+  return useQuery({
+    queryKey: id ? ["feedback", { id: id }] : [""],
+    queryFn: () => feedbackService.get(id),
+    throwOnError: true,
+  });
+};
+
+export const useDeleteFeedback = (callback?: () => void) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => feedbackService.delete(id),
+    onSuccess: (response, userPassedToFunction) => {
+      // invalid query
+      queryClient.invalidateQueries({
+        queryKey: ["feedback"],
+      });
+
+      if (callback) {
+        callback();
+      }
+    },
+    throwOnError: true,
+  });
+};
+export const useEditFeedback = (callback?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Feedback) => feedbackService.put(data, data.feedback_id),
+    onSuccess: () => {
+      // invalid query
+      queryClient.invalidateQueries({
+        queryKey: ["feedback"],
+      });
+
+      if (callback) {
+        callback();
+      }
+    },
+    throwOnError: true,
+  });
+};
+
 const usePostFeedback = (callback?: () => void) => {
   const queryClient = useQueryClient();
 

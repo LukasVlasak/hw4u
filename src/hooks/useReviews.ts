@@ -34,6 +34,42 @@ const usePostReview = (callback?: () => void) => {
   });
 };
 
+export const useGetReviews = () => {
+  return useQuery({
+    queryKey: ["reviews"],
+    queryFn: () => reviewService.getAll(),
+    throwOnError: true,
+    staleTime: 30 * 60000, // 30 minut
+  });
+};
+
+export const useGetOneReview = (id?: number) => {
+  return useQuery({
+    queryKey: id ? ["reviews", {id: id}] : [""],
+    queryFn: () => reviewService.get(id),
+    throwOnError: true,
+    staleTime: 30 * 60000, // 30 minut
+  });
+};
+
+export const useAdminDeleteReview = (callback?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => reviewService.deleteDiferentRoute("admin", id),
+    onSuccess: (response, userPassedToFunction) => {
+      // invalid query
+      queryClient.invalidateQueries({
+        queryKey: ["reviews"],
+      });
+
+      if (callback) {
+        callback();
+      }
+    },
+    throwOnError: true,
+  });
+};
+
 export const useDeleteReview = (callback?: () => void) => {
   const queryClient = useQueryClient();
   return useMutation({

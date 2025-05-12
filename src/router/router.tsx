@@ -12,10 +12,16 @@ import axios from "axios";
 import PrivateRoute from "../UI/layout/components/PrivateRoutes";
 import ModalIsOpenContextProvider from "../context/ModalIsOpenContextProvider";
 import UsersList from "../UI/pages/UsersList";
+import UsersListAdmin from "../UI/pages/administration/UsersList";
 import UserReviews from "../UI/pages/UserReviews";
 import PrivateAdminRoute from "../UI/layout/components/PrivateAdminRoute";
 import SidebarWithHeader from "../UI/layout/AdminLayout";
 import Dashboard from "../UI/pages/administration/Dashboard";
+import FeedbackList from "../UI/pages/administration/FeedbackList";
+import ReviewList from "../UI/pages/administration/ReviewList";
+import CategoryList from "../UI/pages/administration/CategoryList";
+import ProductList from "../UI/pages/administration/ProductList";
+import Pricing from "../UI/pages/Pricing";
 
 const router = createBrowserRouter([
   {
@@ -68,6 +74,10 @@ const router = createBrowserRouter([
         ]
       },
       {
+        path: "pricing",
+        element: <Pricing />,
+      },
+      {
         path: "tasks",
         element: (
           <ModalIsOpenContextProvider>
@@ -107,6 +117,26 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Dashboard />,
+      },
+      {
+        path: "users",
+        element: <UsersListAdmin />
+      },
+      {
+        path: "feedback",
+        element: <FeedbackList />
+      },
+      {
+        path: "reviews",
+        element: <ReviewList />
+      },
+      {
+        path: "categories",
+        element: <CategoryList />
+      },
+      {
+        path: "products",
+        element: <ProductList />
       }
     ]
   }

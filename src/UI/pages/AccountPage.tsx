@@ -41,11 +41,12 @@ import { useAnswersByUser, useDeleteAnswer } from "../../hooks/useAnswers";
 import React from "react";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { Interweave } from "interweave";
-import AddReviewModal from "../components/AddReviewModal";
+import AddReviewModal from "../components/modals/AddReviewModal";
 import EditAccountModal from "../components/EditAccountModal";
-import AddFeedbackModal from "../components/AddFeedbackModal";
+import AddFeedbackModal from "../components/modals/AddFeedbackModal";
 import { useGetOneUser } from "../../hooks/useUsers";
 import { Review } from "../../services/reviewService";
+import { useGetActiveProduct } from "../../hooks/useProducts";
 
 const AccountPage = () => {
   const params = useParams();
@@ -76,6 +77,8 @@ const AccountPage = () => {
       description: t("homePage.reviews.successPostDesc"),
     });
   });
+
+  const { data: activePayments } = useGetActiveProduct();
 
   
   // const { mutate: deleteTask } = useDeleteTask(() => {
@@ -217,15 +220,28 @@ const AccountPage = () => {
           <TabList mb="1em">
             <Tab>{t("account.answeredQuestions")}</Tab>
             <Tab>{t("account.addedTasks")}</Tab>
+            <Tab>Aktivní produkty</Tab>
           </TabList>
           <TabPanels>
             
             <TabPanel>
-              {isLoading ? (
-                <LoadingComponents />
-              ) : data ? (
-                <p>todo datagrid</p>
-              ) : null}
+            </TabPanel>
+            <TabPanel>
+            </TabPanel>
+            <TabPanel>
+              {activePayments && activePayments.map((product) => {
+                return (
+                  <Flex key={product.product_id} flexDir={"column"} mb={4} maxW={'400px'} borderWidth={1} borderColor={'green'} borderRadius={"lg"} p={4} boxShadow={"lg"}>
+                    <Flex justifyContent={"space-between"} alignItems={"center"}>
+                      <Text fontSize={"lg"}>{product.name}</Text>
+                      <Text fontSize={"lg"}>{product.price} Kč</Text>
+                    </Flex>
+                    <Flex justifyContent={"space-between"} alignItems={"center"}>
+                      <Text fontSize={"sm"}>{"Počet zbývajicích odpovědí: " + (product.answer_limit - product.answered!)}</Text>
+                    </Flex>
+                  </Flex>
+                )
+              })}
             </TabPanel>
           </TabPanels>
         </Tabs>

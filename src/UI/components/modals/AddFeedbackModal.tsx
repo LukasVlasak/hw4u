@@ -23,12 +23,12 @@ import { t } from "i18next";
 import Joi from "joi";
 import { FieldValues, useForm } from "react-hook-form";
 import { Form } from "react-router-dom";
-import { useEditAccount } from "../../hooks/useUsers";
+import { useEditAccount } from "../../../hooks/useUsers";
 import { useContext, useEffect, useState } from "react";
-import { User } from "../../services/userService";
-import useAuth from "../../hooks/useAuth";
-import usePostFeedback from "../../hooks/useFeedback";
-import { Feedback } from "../../services/feedbackService";
+import { User } from "../../../services/userService";
+import useAuth from "../../../hooks/useAuth";
+import usePostFeedback from "../../../hooks/useFeedback";
+import { Feedback } from "../../../services/feedbackService";
 
 interface Props {
   isOpen: boolean;

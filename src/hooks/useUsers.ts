@@ -45,6 +45,42 @@ export const useEditAccount = (callback?: () => void) => {
   });
 }
 
+export const useEditUser = (callback?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: User) => userService.put(data, data.app_user_id),
+    onSuccess: (response, userPassedToFunction) => {
+      // invalid query
+      queryClient.invalidateQueries({
+        queryKey: ["users"],
+      });
+      if (callback) {
+        callback();
+      }
+    },
+    throwOnError: true
+  });
+};
+
+export const useDeleteUser = (callback?: () => void) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => userService.delete(id),
+    onSuccess: () => {
+      // invalid query
+      queryClient.invalidateQueries({
+        queryKey: ["users"],
+      });
+      
+      if (callback) {
+        callback();
+      }
+    },
+    throwOnError: true
+  });
+};
+
 const useRegister = (callback?: () => void) => {
   const queryClient = useQueryClient();
 

@@ -4,6 +4,7 @@ export interface Category {
     category_id: number;
     name: string;
     parent_category_id?: number;
+    parent_category_name?: string;
 }
 
 const categoryService = new APIClient<Category>("category");
