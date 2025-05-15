@@ -1,34 +1,24 @@
+import { Answer } from "./answerService";
 import APIClient from "./api-client";
+import { Category } from "./categoryService";
 
 export interface Task {
-    id: number;
+    task_id: number;
     title: string;
-    willing_to_pay: number;
-    category: string;
-    due_date?: Date;
-    user_id: number;
+    price: number;
     description: string;
-    for_user_id?: number;
-    created_date?: Date;
-    category_second?: string;
+    due_date?: Date;
+    status: string;
+    created_date: Date;
+    app_user_id: number;
+    app_user_email?: string;
+    category_hierarchy?: Category[];
+    category_name? : string;
+    answers?: Answer[];
 }
 
 export interface LoaderDataTaskInterface {
     data: Task[];
-}
-
-export const TaskCategoryObj = {
-    quality: "Quality",
-    marketing: "Marketing",
-    development: "Development",
-    neco: "Neco"
-}
-
-export const TaskCategoryObj2 = {
-    math: "Math",
-    geo: "Geo",
-    cj: "Cj",
-    aj: "Aj"
 }
 
 const taskService = new APIClient<Task>("tasks");

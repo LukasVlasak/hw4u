@@ -6,16 +6,16 @@ import {
   FormErrorMessage,
   FormLabel,
   Input,
-  Text,
-  useToast,
+  Text
 } from "@chakra-ui/react";
 import styled from "@emotion/styled";
+import { useEffect } from "react";
 import { FieldValues, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useLogin } from "../../hooks/useAuth";
+import useNavigateWithToast from "../../hooks/useNavigateWithToast";
 import { User } from "../../services/userService";
-import { useEffect } from "react";
 
 interface FormData {
   email: string;
@@ -45,11 +45,9 @@ const Div = styled("div")({
 
 const LoginForm = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const toast = useToast();
+  const navigateWithToast = useNavigateWithToast();
   const { mutate, error } = useLogin(() => {
-    navigate("/");
-    toast({
+    navigateWithToast("/", {
       description: t("auth.successSignInDesc"),
       title: t("auth.successSignIn"),
       duration: 5000,
@@ -124,7 +122,9 @@ const LoginForm = () => {
             <FormErrorMessage>{t("errors.required")}</FormErrorMessage>
           ) : null}
         </FormControl>
-        <Checkbox mt={4} {...register("rememberMe")} defaultChecked>{t("auth.rememberMe")}</Checkbox>
+        <Checkbox mt={4} {...register("rememberMe")} defaultChecked>
+          {t("auth.rememberMe")}
+        </Checkbox>
         <Button type="submit" mt={6} mb={3} colorScheme="blue">
           {t("auth.submit")}
         </Button>

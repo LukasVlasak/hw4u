@@ -27,20 +27,27 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { HiMiniChevronDown } from "react-icons/hi2";
 import { IoMdClose } from "react-icons/io";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import authContext from "../../../context/AuthContext";
-import { useLogout } from "../../../hooks/useAuth";
+import useAuth, { useLogout } from "../../../hooks/useAuth";
+import useNavigateWithToast from "../../../hooks/useNavigateWithToast";
+import LngSwitcher from "./LngSwitcher";
+
+interface NavItem {
+  label: string;
+  subLabel?: string;
+  children?: Array<NavItem>;
+  href?: string;
+  index?: number;
+}
 
 export default function NavBar() {
   const { isOpen, onToggle } = useDisclosure();
-  const navigate = useNavigate();
+  const navigateWithToast = useNavigateWithToast();
   const { t } = useTranslation();
-  const toast = useToast();
-  const { value } = useContext(authContext);
-  
+
+  const { data: user } = useAuth();
   const { mutate } = useLogout(() => {
     // callback
-    navigate("/"); 
-    toast({
+    navigateWithToast("/", {
       status: "success",
       duration: 5000,
       isClosable: true,
@@ -52,6 +59,65 @@ export default function NavBar() {
   const handleSignOut = () => {
     mutate();
   };
+
+  const NAV_ITEMS: Array<NavItem> = [
+    {
+      label: t("nav.questions"),
+      children: [
+        {
+          label: t("nav.answerAQuestion"),
+          subLabel: t("nav.answerAQuestionDesc"),
+          href: "/tasks",
+        },
+      ],
+    },
+    {
+      label: t("nav.findHelp"),
+      children: [
+        {
+          label: t("nav.users"),
+          subLabel: t("nav.usersDesc"),
+          href: "/users",
+        },
+      ],
+    },
+    {
+      label: t("nav.pricingHowItWorks"),
+      href: "/pricing",
+    },
+  ];
+  
+  const NAV_ITEMS_MOBILE: Array<NavItem> = [
+    {
+      label: t("nav.home"),
+      href: "/",
+    },
+    {
+      label: t("nav.answerAQuestion"),
+      children: [
+        {
+          label: t("nav.answerAQuestion"),
+          subLabel: t("nav.answerAQuestionDesc"),
+          href: "/tasks",
+        },
+      ],
+    },
+    {
+      label: t("nav.findHelp"),
+      children: [
+        {
+          label: t("nav.users"),
+          subLabel: t("nav.usersDesc"),
+          href: "/users",
+        },
+      ],
+    },
+    {
+      label: t("nav.pricingHowItWorks"),
+      href: "/pricing",
+    },
+  ];
+  
 
   return (
     <Headroom pinStart={60}>
@@ -75,7 +141,7 @@ export default function NavBar() {
             <Link to={"/"}>
               <img
                 alt="company logo"
-                src="./logo.png"
+                src="/logo.png"
                 width={135}
                 className="pt-2"
                 height={45}
@@ -106,11 +172,11 @@ export default function NavBar() {
           </Flex>
           <Flex flex={{ base: 1 }} justify={{ base: "center", md: "center" }}>
             <Flex display={{ base: "none", md: "flex" }} ml={10}>
-              <DesktopNav />
+              <DesktopNav NAV_ITEMS={NAV_ITEMS}  />
             </Flex>
           </Flex>
 
-          {!value ? (
+          {!user ? (
             <Stack
               flex={{ base: 1, md: 0 }}
               justify={"flex-end"}
@@ -118,6 +184,7 @@ export default function NavBar() {
               spacing={6}
               alignItems={"center"}
             >
+              <LngSwitcher />
               <Button
                 fontSize={"md"}
                 fontWeight={400}
@@ -136,7 +203,7 @@ export default function NavBar() {
                 fontWeight={600}
                 color={"white"}
                 bg={"transparent"}
-                onClick={() => navigate("/register")}
+                onClick={() => navigateWithToast("/register")}
                 border={"2px solid white"}
                 _hover={{ color: "brand.hoverBlueColor" }}
                 _focus={{ bg: "transparent" }}
@@ -146,6 +213,7 @@ export default function NavBar() {
             </Stack>
           ) : (
             <Menu>
+              <LngSwitcher />
               <MenuButton
                 aria-label="User account options"
                 /* _expanded={} */ _active={{
@@ -157,25 +225,20 @@ export default function NavBar() {
                 color={"white"}
                 as={IconButton}
                 icon={<FaRegUser />}
-              >
-                Actions
-              </MenuButton>
+              />
               <MenuList color={"black"}>
-                <Link role="group" to={"/account"}>
+                <Link role="group" to={"/users/" + user[0].app_user_id}>
                   <MenuItem _groupHover={{ color: "brand.hoverBlueColor" }}>
                     {t("account.account")}
                   </MenuItem>
                 </Link>
-                <Link role="group" to={"/ask"}>
-                  <MenuItem _groupHover={{ color: "brand.hoverBlueColor" }}>
-                    {t("tasks.askAQuestion")}
-                  </MenuItem>
-                </Link>
-                <Link role="group" to={"/subscripe"}>
-                  <MenuItem _groupHover={{ color: "brand.hoverBlueColor" }}>
-                    {t("subscripe.subscripe")}
-                  </MenuItem>
-                </Link>
+                {user[0].is_admin === true && (
+                  <Link role="group" to={"/administration"}>
+                    <MenuItem _groupHover={{ color: "brand.hoverBlueColor" }}>
+                      {t("admin.administration")}
+                    </MenuItem>
+                  </Link>
+                )}
                 <MenuItem
                   _hover={{ color: "brand.hoverBlueColor" }}
                   onClick={handleSignOut}
@@ -188,14 +251,18 @@ export default function NavBar() {
         </Flex>
 
         <Collapse in={isOpen} animateOpacity>
-          <MobileNav />
+          <MobileNav NAV_ITEMS_MOBILE={NAV_ITEMS_MOBILE} />
         </Collapse>
       </Box>
     </Headroom>
   );
 }
 
-const DesktopNav = () => {
+interface DesktopNavProps {
+  NAV_ITEMS: Array<NavItem>;
+}
+
+const DesktopNav = ({NAV_ITEMS}: DesktopNavProps) => {
   const linkColor = "gray.200";
   const linkHoverColor = "white";
   const popoverContentBgColor = "white";
@@ -286,7 +353,10 @@ const DesktopSubNav = ({ label, href, subLabel }: NavItem) => {
   );
 };
 
-const MobileNav = () => {
+interface MobileNavProps {
+  NAV_ITEMS_MOBILE: Array<NavItem>;
+}
+const MobileNav = ({NAV_ITEMS_MOBILE}: MobileNavProps) => {
   return (
     <Stack
       bg={"white"}
@@ -371,116 +441,3 @@ const MobileNavItem = ({ label, children, href, index }: NavItem) => {
     </Stack>
   );
 };
-
-interface NavItem {
-  label: string;
-  subLabel?: string;
-  children?: Array<NavItem>;
-  href?: string;
-  index?: number;
-}
-
-const NAV_ITEMS: Array<NavItem> = [
-  {
-    label: "Vydělávej peníze",
-    children: [
-      {
-        label: "Odpověz na otázku",
-        subLabel: "Za to jsou lidé schopni utrácet opravdu hodně",
-        href: "/tasks",
-      },
-      {
-        label: "Archiv otazek",
-        subLabel: "Za to jsou lidé schopni utrácet opraklvdu hodně",
-        href: "/tasks_archive",
-      },
-      {
-        label: "Pozvi kámaše",
-        subLabel: "Pozvi kámoše pomocí speciálního linku",
-        href: "/invite",
-      },
-    ],
-  },
-  {
-    label: "Najdi pomoc",
-    children: [
-      {
-        label: "Zadej úkol",
-        subLabel: "Vytvoř úkol, se kterým si nevíš rady a někdo ti rád pomůže",
-        href: "/createTask",
-      },
-      {
-        label: "Podívej se na zodpovězené otázky",
-        subLabel:
-          "Koukni se komu už naše stránka pomohla a třeba najdeš odpověď na svůj problém",
-        href: "/answeredQuestions",
-      },
-      {
-        label: "Uživatelé",
-        subLabel:
-          "Podívej se na to, v čem jsou naši uživatelé vzdělaní a můžeš je přímo požádat o pomoc",
-        href: "/users",
-      },
-    ],
-  },
-  {
-    label: "Ceník / Jak to funguje",
-    href: "/pricing",
-  },
-  {
-    label: "Podpora / FAQ",
-    href: "/faq",
-  },
-];
-
-const NAV_ITEMS_MOBILE: Array<NavItem> = [
-  {
-    label: "Domů",
-    href: "/",
-  },
-  {
-    label: "Vydělávej peníze",
-    children: [
-      {
-        label: "Odpověz na otázku",
-        subLabel: "Za to jsou lidé schopni utrácet opravdu hodně",
-        href: "/tasks",
-      },
-      {
-        label: "Pozvi kámaše",
-        subLabel: "Pozvi kámoše pomocí speciálního linku",
-        href: "/invite",
-      },
-    ],
-  },
-  {
-    label: "Najdi pomoc",
-    children: [
-      {
-        label: "Zadej úkol",
-        subLabel: "Vytvoř úkol, se kterým si nevíš rady a někdo ti rád pomůže",
-        href: "/createTask",
-      },
-      {
-        label: "Podívej se na zodpovězené otázky",
-        subLabel:
-          "Koukni se komu už naše stránka pomohla a třeba najdeš odpověď na svůj problém",
-        href: "/answeredQuestions",
-      },
-      {
-        label: "Uživatelé",
-        subLabel:
-          "Podívej se na to, v čem jsou naši uživatelé vzdělaní a můžeš je přímo požádat o pomoc",
-        href: "/users",
-      },
-    ],
-  },
-  {
-    label: "Ceník / Jak to funguje",
-    href: "/pricing",
-  },
-  {
-    label: "Podpora / FAQ",
-    href: "/faq",
-  },
-];

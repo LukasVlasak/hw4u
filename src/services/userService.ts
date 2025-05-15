@@ -1,14 +1,16 @@
 import APIClient from "./api-client";
 
 export interface User {
-    id: number;
+    app_user_id: number;
     created_date: Date;
-    name: string;
+    full_name: string;
     email: string;
     password: string;
-    country: string;
-    username: string;
-    bought_answers: number[];
+    username?: string;
+    average_rating?: number;
+    is_admin: boolean;
+    avg_rating?: number;
+    total_earnings?: number;
 }
 
 const userService = new APIClient<User>("users");

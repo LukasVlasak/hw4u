@@ -8,7 +8,6 @@ const Error = () => {
   const isNotFound = isRouteErrorResponse(error);
 
   return (
-    <div>
       <div id="notfound">
         <div className="notfound">
           <div className="notfound-404">
@@ -41,7 +40,6 @@ const Error = () => {
           </Link>
         </div>
       </div>
-    </div>
   );
 };
 

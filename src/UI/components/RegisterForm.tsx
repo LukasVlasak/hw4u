@@ -8,8 +8,7 @@ import {
   Input,
   ListItem,
   Text,
-  UnorderedList,
-  useToast,
+  UnorderedList
 } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import { joiResolver } from "@hookform/resolvers/joi";
@@ -17,16 +16,16 @@ import Joi from "joi";
 import { useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import useNavigateWithToast from "../../hooks/useNavigateWithToast";
 import useRegister from "../../hooks/useUsers";
 import { User } from "../../services/userService";
 
 interface FormData {
-  username: string;
+  username?: string;
   email: string;
   password: string;
-  country: string;
-  name: string;
+  full_name: string;
 }
 
 const Form = styled("form")({
@@ -55,9 +54,9 @@ const RegisterForm = () => {
     username: Joi.string()
       .min(3)
       .max(15)
+      .allow("")
       // eslint-disable-next-line
       .regex(/[a-zA-Z0-9\.]/)
-      .required()
       .messages({
         "string.min": t("auth.usernameErrors.1"),
         "string.max": t("auth.usernameErrors.2"),
@@ -72,11 +71,11 @@ const RegisterForm = () => {
       .min(8)
       .required()
       .messages({ "string.min": "", "string.pattern.base": "" }),
-    country: Joi.string().required(),
-    name: Joi.string()
+    full_name: Joi.string()
+    .required()
       .min(3)
-      .max(30)
-      .regex(/[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ]/)
+      .max(50)
+      .regex(/[a-zA-ZěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ]+/)
       .messages({
         "string.min": t("auth.nameErrors.1"),
         "string.max": t("auth.nameErrors.2"),
@@ -91,17 +90,15 @@ const RegisterForm = () => {
     handleSubmit,
     formState: { errors, isSubmitted },
   } = useForm<FormData>({ resolver: joiResolver(schema) });
-  const navigate = useNavigate();
-  const toast = useToast();
+  const navigateWithToast = useNavigateWithToast();
   const { mutate, error } = useRegister(() => {
-    navigate("/");
-    toast({
+    navigateWithToast("/", {
       title: t("auth.accountCreated"),
       description: t("auth.yourAccountWasCreated"),
       duration: 5000,
       isClosable: true,
-      status: 'success'
-    })
+      status: "success",
+    });
   });
   const [passwordVal, setPasswordVal] = useState("");
   const patternMin = new RegExp(/.{8,}/);
@@ -117,16 +114,16 @@ const RegisterForm = () => {
         {t("auth.signUp")}
       </Text>
       <Form onSubmit={handleSubmit(onSubmit)}>
-        <FormControl isInvalid={errors.name ? true : false}>
+        <FormControl isInvalid={errors.full_name ? true : false}>
           <FormLabel>{t("auth.name")}</FormLabel>
           <Input
             autoComplete="name"
-            {...register("name")}
-            name="name"
+            {...register("full_name")}
+            name="full_name"
             type="text"
           />
-          {errors.name ? (
-            <FormErrorMessage>{errors.name.message}</FormErrorMessage>
+          {errors.full_name ? (
+            <FormErrorMessage>{errors.full_name.message}</FormErrorMessage>
           ) : null}
         </FormControl>
         <FormControl
@@ -248,13 +245,6 @@ const RegisterForm = () => {
                 </UnorderedList>
               </>
             ) : null
-          ) : null}
-        </FormControl>
-        <FormControl mt={2} isInvalid={errors.country ? true : false}>
-          <FormLabel>{t("auth.country")}</FormLabel>
-          <Input {...register("country")} name="country" type="text" />
-          {errors.country ? (
-            <FormErrorMessage>{errors.country.message}</FormErrorMessage>
           ) : null}
         </FormControl>
         <Button type="submit" mt={6} mb={3} colorScheme="blue">

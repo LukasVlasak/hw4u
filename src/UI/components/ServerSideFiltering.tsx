@@ -97,7 +97,7 @@ const ServerSideFiltering = () => {
           {data.pages.map((d) => {
             return d.map((di) => {
               return (
-                <Tr key={di.id}>
+                <Tr key={di.task_id}>
                   {Object.values(di).map((v, i) => {
                     return <Td key={i}>{v}</Td>;
                   })}
