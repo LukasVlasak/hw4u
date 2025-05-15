@@ -1,4 +1,5 @@
 import { APIClientFormData } from "./api-client";
+import { Document } from "./documentService";
 
 export interface Answer {
     answer_id: number;
@@ -12,6 +13,8 @@ export interface Answer {
     task_id: number;
     app_user_id: number;
     updated_date?: Date;
+    app_user_email_answer?: string;
+    documents?: Document[];
 }
 
 const answerService = new APIClientFormData<Answer>("answers");

@@ -69,31 +69,11 @@ export default function NavBar() {
           subLabel: t("nav.answerAQuestionDesc"),
           href: "/tasks",
         },
-        {
-          label: t("nav.archivOfQuestions"),
-          subLabel: t("nav.archivOfQuestionsDesc"),
-          href: "/tasks_archive",
-        },
-        {
-          label: t("nav.inviteAFriend"),
-          subLabel: t("nav.inviteAFriendDesc"),
-          href: "/invite",
-        },
       ],
     },
     {
       label: t("nav.findHelp"),
       children: [
-        {
-          label: t("nav.setATask"),
-          subLabel: t("nav.setATaskDesc"),
-          href: "/create-task",
-        },
-        {
-          label: t("nav.answeredQuestions"),
-          subLabel: t("nav.answeredQuestionsDesc"),
-          href: "/asnwered-questions",
-        },
         {
           label: t("nav.users"),
           subLabel: t("nav.usersDesc"),
@@ -104,10 +84,6 @@ export default function NavBar() {
     {
       label: t("nav.pricingHowItWorks"),
       href: "/pricing",
-    },
-    {
-      label: t("nav.supportFAQ"),
-      href: "/faq",
     },
   ];
   
@@ -124,26 +100,11 @@ export default function NavBar() {
           subLabel: t("nav.answerAQuestionDesc"),
           href: "/tasks",
         },
-        {
-          label: t("nav.inviteAFriend"),
-          subLabel: t("nav.inviteAFriendDesc"),
-          href: "/invite",
-        },
       ],
     },
     {
       label: t("nav.findHelp"),
       children: [
-        {
-          label: t("nav.setATask"),
-          subLabel: t("nav.setATaskDesc"),
-          href: "/createTask",
-        },
-        {
-          label: t("nav.answeredQuestions"),
-          subLabel: t("nav.answeredQuestionsDesc"),
-          href: "/answeredQuestions",
-        },
         {
           label: t("nav.users"),
           subLabel: t("nav.usersDesc"),
@@ -154,10 +115,6 @@ export default function NavBar() {
     {
       label: t("nav.pricingHowItWorks"),
       href: "/pricing",
-    },
-    {
-      label: t("nav.supportFAQ"),
-      href: "/faq",
     },
   ];
   
@@ -273,16 +230,6 @@ export default function NavBar() {
                 <Link role="group" to={"/users/" + user[0].app_user_id}>
                   <MenuItem _groupHover={{ color: "brand.hoverBlueColor" }}>
                     {t("account.account")}
-                  </MenuItem>
-                </Link>
-                <Link role="group" to={"/ask"}>
-                  <MenuItem _groupHover={{ color: "brand.hoverBlueColor" }}>
-                    {t("tasks.askAQuestion")}
-                  </MenuItem>
-                </Link>
-                <Link role="group" to={"/subscripe"}>
-                  <MenuItem _groupHover={{ color: "brand.hoverBlueColor" }}>
-                    {t("subscripe.subscripe")}
                   </MenuItem>
                 </Link>
                 {user[0].is_admin === true && (

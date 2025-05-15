@@ -8,6 +8,7 @@ export interface Feedback {
     app_user_id: number;
     full_name: string;
     email: string;
+    unresolved_feedback_count? : number;
 }
 
 const feedbackService = new APIClient<Feedback>("feedback");

@@ -28,6 +28,16 @@ export const useGetCategories = () => {
         staleTime: 30 * 60000, // 30 minut
     })
 }
+
+export const useGetCategoryWithParentId = (id?: number) => {
+    return useQuery({
+        queryKey: id ? ["category", {id: id}] : [""],
+        queryFn: () => categoryService.getDifferentRouteWithId("parent-id", id),
+        throwOnError: true,
+        staleTime: 30 * 60000, // 30 minut
+    })
+}
+
 export const useGetOneCategory = (id?: number) => {
     return useQuery({
         queryKey: id ? ["category", {id: id}] : [""],

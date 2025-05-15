@@ -96,12 +96,6 @@ import { CiMoneyBill } from "react-icons/ci";
         pathname: "/administration/tasks",
       },
       {
-        name: "Platby",
-        icon: CiMoneyBill,
-        activeIcon: FaMoneyBill,
-        pathname: "/administration/payments",
-      },
-      {
         name: "Recenze",
         icon: MdOutlineRateReview,
         activeIcon: MdRateReview,

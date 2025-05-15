@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import productService, { Product } from "../services/productService";
+import { AxiosError } from "axios";
+import { ErrorCode } from "../services/api-client";
 
 const usePostProduct = (callback?: () => void) => {
     const queryClient = useQueryClient();
@@ -28,11 +30,26 @@ export const useGetProducts = () => {
     })
 }
 
+export const useGetProductsByUser = () => {
+    return useQuery<Product[], AxiosError<ErrorCode>>({
+        queryKey: ["product", "by-user"],
+        queryFn: () => productService.getDifferentRoute("by-user"),
+        throwOnError: (error) => {
+            if (error.response?.status === 400) return false;
+            else return true;
+        },
+        staleTime: 30 * 60000, // 30 minut
+    })
+}
+
 export const useGetActiveProduct = () => {
-    return useQuery({
+    return useQuery<Product[], AxiosError<ErrorCode>>({
         queryKey: ["active-products"],
         queryFn: () => productService.getDifferentRoute("active"),
-        throwOnError: true,
+        throwOnError: (error) => {
+            if (error.response?.status === 400) return false;
+            else return true;
+        },
         staleTime: 30 * 60000, // 30 minut
     })
 }

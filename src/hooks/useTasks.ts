@@ -13,16 +13,10 @@ interface TaskInfiniteQuery {
   where?: string;
 }
 
-const useTasks = (queryObject?: TaskQuery) => {
+const useTasks = () => {
   return useQuery({
     queryKey: ["tasks"],
-    queryFn: () =>
-      taskService.getAll(
-        queryObject && {
-          _start: (queryObject.page - 1) * queryObject.pageSize,
-          _limit: queryObject.pageSize,
-        }
-      ), // queryFn: taskService.getAll - nefunguje - this v classe nefunguje
+    queryFn: () => taskService.getAll(),
     throwOnError: true,
   });
 };
@@ -37,7 +31,7 @@ export const useTasksWithUsers = () => {
 
 export const useTasksByUser = (id?: number) => {
   return useQuery({
-    queryKey: id ? ["user/tasks/" + id] : [""],
+    queryKey: id ? ["tasks-by-user"] : [""],
     queryFn: () => taskService.getDifferentRouteWithId("by-user", id),
     throwOnError: true,
   });
@@ -54,7 +48,7 @@ export const useDeleteTask = (callback?: () => void) => {
 
       queryClient.invalidateQueries({queryKey: ["tasks/by/user"]});
       queryClient.invalidateQueries({queryKey: ["tasks"]});
-      queryClient.invalidateQueries({queryKey: ["tasks/with/users"]});
+      queryClient.invalidateQueries({queryKey: ["tasks-by-user"]});
 
       if (callback) {
         callback();
@@ -90,7 +84,7 @@ export const useEditTask = (callback?: () => void) => {
       queryClient.invalidateQueries({queryKey: ['tasks', {id: varialbes.task_id}]});
       queryClient.invalidateQueries({queryKey: ["tasks/by/user"]});
       queryClient.invalidateQueries({queryKey: ["tasks"]});
-      queryClient.invalidateQueries({queryKey: ["tasks/with/users"]});
+      queryClient.invalidateQueries({queryKey: ["tasks-by-user"]});
       if (callback) {
         callback();
       }
@@ -135,6 +129,7 @@ export const usePostTask = (callback?: () => void) => {
       queryClient.invalidateQueries({queryKey: ["tasks/by/user"]});
       queryClient.invalidateQueries({queryKey: ["tasks"]});
       queryClient.invalidateQueries({queryKey: ["tasks/with/users"]});
+      queryClient.invalidateQueries({queryKey: ["tasks-by-user"]});
 
       if (callback) {
         callback();

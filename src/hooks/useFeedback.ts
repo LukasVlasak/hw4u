@@ -18,6 +18,15 @@ export const useGetOneFeedback = (id?: number) => {
   });
 };
 
+export const useGetUnresolvedFeedback = () => {
+  return useQuery({
+    queryKey: ["feedback/unresolved"],
+    queryFn: () => feedbackService.getDifferentRoute("unresolved"),
+    throwOnError: true,
+    staleTime: 30 * 60000, // 30 minut
+  });
+};
+
 export const useDeleteFeedback = (callback?: () => void) => {
   const queryClient = useQueryClient();
 
@@ -44,6 +53,9 @@ export const useEditFeedback = (callback?: () => void) => {
       // invalid query
       queryClient.invalidateQueries({
         queryKey: ["feedback"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["feedback/unresolved"],
       });
 
       if (callback) {

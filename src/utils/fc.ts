@@ -21,4 +21,19 @@ export const deleteConfirm = (message: string) => {
   return window.confirm(message);
 }
 
+
+export const formatBytes = (bytes: number): string => {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  } else if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(0)} KB`;
+  } else {
+    return `${(bytes / 1024 / 1024).toFixed(0)} MB`;
+  }
+};
+
+export const truncateText = (text: string, maxLength: number) => {
+  return text.length > maxLength ? text.slice(0, maxLength) + ".." : text;
+}
+
 export default formatDateToDDMMYYYY;

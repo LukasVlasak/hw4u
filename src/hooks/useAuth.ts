@@ -48,6 +48,8 @@ export const useLogout = (callback?: () => void) => {
         queryKey: ["auth"],
       });
 
+      queryClient.invalidateQueries();
+
       if (callback) {
         callback();
       }

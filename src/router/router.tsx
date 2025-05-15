@@ -22,6 +22,9 @@ import ReviewList from "../UI/pages/administration/ReviewList";
 import CategoryList from "../UI/pages/administration/CategoryList";
 import ProductList from "../UI/pages/administration/ProductList";
 import Pricing from "../UI/pages/Pricing";
+import TaskList from "../UI/pages/TaskList";
+import AnswersList from "../UI/pages/administration/AnswersList";
+import TasksList from "../UI/pages/administration/TasksList";
 
 const router = createBrowserRouter([
   {
@@ -80,28 +83,13 @@ const router = createBrowserRouter([
       {
         path: "tasks",
         element: (
-          <ModalIsOpenContextProvider>
-            <TaskPage />
-          </ModalIsOpenContextProvider>
+          <TaskList />
         ),
       },
       {
-        path: "tasks_archive",
-        element: <ServerSideFiltering />,
-      },
-      {
-        path: "task/:id",
-        id: "task",
-        loader: ({ params, request }) => {
-          // commonly used na serachparametres - user neco hleda tak presmeruji na ?q=neco, loader to zachyti,
-          // z url adresy si vesmu co chci a udelam request na server
-
-          return axios.get("http://localhost:3001/api/tasks/" + params.id);
-        },
+        path: "tasks/:id",
         element: (
-          <PrivateRoute>
-            <OneTaskPage />
-          </PrivateRoute>
+          <OneTaskPage />
         ),
       },
     ],
@@ -137,6 +125,14 @@ const router = createBrowserRouter([
       {
         path: "products",
         element: <ProductList />
+      },
+      {
+        path: "answers",
+        element: <AnswersList />
+      },
+      {
+        path: "tasks",
+        element: <TasksList />
       }
     ]
   }

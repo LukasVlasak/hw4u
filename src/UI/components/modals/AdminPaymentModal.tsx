@@ -19,7 +19,6 @@ interface FormData {
 }
 
 const AdminPaymentModal = ({isOpen, onClose, productId}: Props) => {
-  console.log(productId);
   
     const schema = Joi.object({
         email: Joi.string()
@@ -44,7 +43,6 @@ const AdminPaymentModal = ({isOpen, onClose, productId}: Props) => {
       });
       onClose();
     });
-    console.log(error);
     
       
       const {

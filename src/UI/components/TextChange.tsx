@@ -81,9 +81,8 @@ const TextChange = ({ texts }: Props) => {
     <>
       <Div>
         <span style={{ marginRight: "5px" }} id="onChange">
-          {texts[0]}
+          Školní projekty
         </span>
-        {showCursor ? <Span2></Span2> : <Span></Span>}
       </Div>
     </>
   );

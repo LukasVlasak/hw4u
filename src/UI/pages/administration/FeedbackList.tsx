@@ -1,7 +1,7 @@
 import React from 'react'
-import { useDeleteFeedback, useEditFeedback, useFeedback } from '../../../hooks/useFeedback';
+import { useDeleteFeedback, useEditFeedback, useFeedback, useGetUnresolvedFeedback } from '../../../hooks/useFeedback';
 import useAuth from '../../../hooks/useAuth';
-import { useDisclosure, useToast } from '@chakra-ui/react';
+import { Heading, ListItem, UnorderedList, useDisclosure, useToast } from '@chakra-ui/react';
 import { Feedback } from '../../../services/feedbackService';
 import DataGrid from '../../components/DataGrid';
 import { filter } from 'lodash';
@@ -10,6 +10,7 @@ import FeedbackModal from '../../layout/components/administration/FeedbackModal'
 
 const FeedbackList = () => {
     const { data, isLoading } = useFeedback();
+    const { data: unresolvedData } = useGetUnresolvedFeedback();
     const { mutate } = useEditFeedback(() => {
         toast({
             title: "Feedback upraven",
@@ -23,6 +24,14 @@ const FeedbackList = () => {
     return data ? (
       <>
         <FeedbackModal isOpen={isOpen} onClose={onClose} feedbackId={feedbackId} />
+        <Heading size={'sm'} ml={10} color={'red'}>Unresolved feedbacks</Heading>
+        <UnorderedList ml={10}>
+          {unresolvedData && unresolvedData.length > 0 ? unresolvedData.map((feedback) => (
+            <ListItem key={feedback.full_name}>
+              {feedback.full_name} - {feedback.unresolved_feedback_count}
+            </ListItem>
+          )) : <ListItem>Žádné nevyřešené feedbacky</ListItem>}
+        </UnorderedList>
         <DataGrid<Feedback & { id: number }>
           columns={[
             { key: "feedback_id", label: "ID", isVisible: true },

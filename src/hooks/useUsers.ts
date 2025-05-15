@@ -81,6 +81,15 @@ export const useDeleteUser = (callback?: () => void) => {
   });
 };
 
+export const useGetTopEarningUsers = () => {
+  return useQuery({
+    queryKey: ["top-earning-users"],
+    queryFn: () => userService.getDifferentRoute("top-users"),
+    throwOnError: true,
+    staleTime: 30 * 60000, // 30 minut
+  });
+}
+
 const useRegister = (callback?: () => void) => {
   const queryClient = useQueryClient();
 

@@ -44,7 +44,7 @@ const AddFeedbackModal = ({ onClose, isOpen }: Props) => {
       .min(10)
       .max(300)
       // eslint-disable-next-line
-      .regex(/^[a-zA-Z0-9\.\,\?\!ěščřžýáíéůúĚŠČŘŽÝÁÍÉŮÚ]+$/)
+      .regex(/^[a-zA-Z0-9\.\,\?\!ěščřžýáíéůú\sĚŠČŘŽÝÁÍÉŮÚ]+$/)
       .messages({
         "string.min": t("feedback.min"),
         "string.max": t("feedback.max"),
